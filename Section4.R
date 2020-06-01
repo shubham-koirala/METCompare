@@ -172,21 +172,5 @@ ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/Breas
 
 
 
-########################################################################
-### Fig S6d  scatter plot NOTCH3-HES4 across CCLE TNBC cell lines
-############################################################################
-load('~/Project/Cancer2CellLine/client-side/output/CCLE.breast.cancer.cell.line.meta.R.output/CCLE.breast.cancer.cell.line.meta.RData')
-load('~/Project/Cancer2CellLine/server-side/RData/CCLE.RData')
-
-NOTCH3     <- 'ENSG00000074181'
-HES4       <- 'ENSG00000188290'
-c.cell.line <- intersect(CCLE.breast.cancer.Basal.cell.line,colnames(CCLE.log2.rpkm.matrix))
-CCLE.log2.rpkm.matrix[c(NOTCH3,HES4),c.cell.line] %>% t %>% plot
-
-draw.df <- data.frame(NOTCH3=CCLE.log2.rpkm.matrix[c(NOTCH3),c.cell.line],HES4= CCLE.log2.rpkm.matrix[c(HES4),c.cell.line])
-ggplot(draw.df,aes(x=NOTCH3,y=HES4)) + geom_point(size=5.5) + ggplot.style + ylab('HES4') + xlab('NOTCH3')
-ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section4/HES4.NOTC3.scatter.plot.pdf',width = 20,height=20)
-cor(draw.df$NOTCH3,draw.df$HES4,method='spearman')
-
 
 
