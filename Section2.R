@@ -8,7 +8,7 @@ load('client-side/output/analyze.DE.gene.R.output/common.DE.gene.RData')
 
 
 ##############################################################################
-#---------------- Figure 2 --------------------------------------------------#
+#----------------------Figure 2 ---------------------------------------------#
 ##############################################################################
 
 #######################################################
@@ -91,7 +91,6 @@ ggplot(pooled.rs,aes(x=subtype,y=up.score,fill=stage))  + geom_boxplot(lwd=1.5,o
                                    axis.text.x = element_text(angle = 45, hjust = 1,size=10, face="bold"),
                                    legend.position= 'none')            + xlab('') 
 ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/up.gene.ssgsea.pdf',width = 20,height=20)
-#ggsave(filename = '~/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/up.gene.ssgsea.pdf',width = 20,height=20)
 
 ggplot(pooled.rs,aes(x=subtype,y=dn.score,fill=stage))  + geom_boxplot(lwd=1.5,outlier.shape = NA) + 
   geom_point(position=position_jitterdodge(),size=3.0) + 
@@ -105,48 +104,35 @@ ggplot(pooled.rs,aes(x=subtype,y=dn.score,fill=stage))  + geom_boxplot(lwd=1.5,o
                                    legend.position= 'none')            + xlab('') 
 
 ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/dn.gene.ssgsea.pdf',width = 20,height=20)
-#ggsave(filename = '~/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/dn.gene.ssgsea.pdf',width = 20,height=20)
 
 
 
 
-#ggplot(basal.stage.association.rs,aes(x=stage,y=up.score)) + geom_boxplot(lwd=1.2,outlier.shape = NA) + ggplot.style + geom_jitter(aes(x=stage,y=up.score),size=5.5)  + ylim(-5,5)
-#ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/basal.up.gene.ssgsea.pdf',width = 20,height=20)
 wilcox.test(basal.stage.association.rs$up.score[basal.stage.association.rs$stage == 'stage I'],basal.stage.association.rs$up.score[basal.stage.association.rs$stage == 'stage II'])
 wilcox.test(basal.stage.association.rs$up.score[basal.stage.association.rs$stage == 'stage I'],basal.stage.association.rs$up.score[basal.stage.association.rs$stage == 'stage III'])
 wilcox.test(basal.stage.association.rs$up.score[basal.stage.association.rs$stage == 'stage II'],basal.stage.association.rs$up.score[basal.stage.association.rs$stage == 'stage III'])
 
 
-#ggplot(her2.stage.association.rs,aes(x=stage,y=up.score))  + geom_boxplot(lwd=1.2,outlier.shape = NA) + ggplot.style + geom_jitter(aes(x=stage,y=up.score),size=5.5)  + ylim(-5,5)
-#ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/her2.up.gene.ssgsea.pdf',width = 20,height=20)
 wilcox.test(her2.stage.association.rs$up.score[her2.stage.association.rs$stage == 'stage I'], her2.stage.association.rs$up.score[her2.stage.association.rs$stage == 'stage II'])
 wilcox.test(her2.stage.association.rs$up.score[her2.stage.association.rs$stage == 'stage I'], her2.stage.association.rs$up.score[her2.stage.association.rs$stage == 'stage III'])
 wilcox.test(her2.stage.association.rs$up.score[her2.stage.association.rs$stage == 'stage II'],her2.stage.association.rs$up.score[her2.stage.association.rs$stage == 'stage III'])
 
 
-#ggplot(lumb.stage.association.rs,aes(x=stage,y=up.score))  + geom_boxplot(lwd=1.2,outlier.shape = NA) + ggplot.style + geom_jitter(aes(x=stage,y=up.score),size=5.5)  + ylim(-5,5)
-#ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/lumb.up.gene.ssgsea.pdf',width = 20,height=20)
 wilcox.test(lumb.stage.association.rs$up.score[lumb.stage.association.rs$stage == 'stage I'],lumb.stage.association.rs$up.score[lumb.stage.association.rs$stage == 'stage II'])
 wilcox.test(lumb.stage.association.rs$up.score[lumb.stage.association.rs$stage == 'stage I'],lumb.stage.association.rs$up.score[lumb.stage.association.rs$stage == 'stage III'])
 wilcox.test(lumb.stage.association.rs$up.score[lumb.stage.association.rs$stage == 'stage II'],lumb.stage.association.rs$up.score[lumb.stage.association.rs$stage == 'stage III'])
 
 
-#ggplot(basal.stage.association.rs,aes(x=stage,y=dn.score)) + geom_boxplot(lwd=1.2,outlier.shape = NA) + ggplot.style + geom_jitter(aes(x=stage,y=dn.score),size=5.5)   + ylim(-5,5)
-#ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/basal.dn.gene.ssgsea.pdf',width = 20,height=20)
 wilcox.test(basal.stage.association.rs$dn.score[basal.stage.association.rs$stage == 'stage I'],basal.stage.association.rs$dn.score[basal.stage.association.rs$stage == 'stage II'])
 wilcox.test(basal.stage.association.rs$dn.score[basal.stage.association.rs$stage == 'stage I'],basal.stage.association.rs$dn.score[basal.stage.association.rs$stage == 'stage III'])
 wilcox.test(basal.stage.association.rs$dn.score[basal.stage.association.rs$stage == 'stage II'],basal.stage.association.rs$dn.score[basal.stage.association.rs$stage == 'stage III'])
 
 
-#ggplot(her2.stage.association.rs,aes(x=stage,y=dn.score))  + geom_boxplot(lwd=1.2,outlier.shape = NA) + ggplot.style + geom_jitter(aes(x=stage,y=dn.score),size=5.5)   + ylim(-5,5)
-#ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/her2.dn.gene.ssgsea.pdf',width = 20,height=20)
 wilcox.test(her2.stage.association.rs$dn.score[her2.stage.association.rs$stage == 'stage I'],her2.stage.association.rs$dn.score[her2.stage.association.rs$stage == 'stage II'])
 wilcox.test(her2.stage.association.rs$dn.score[her2.stage.association.rs$stage == 'stage I'],her2.stage.association.rs$dn.score[her2.stage.association.rs$stage == 'stage III'])
 wilcox.test(her2.stage.association.rs$dn.score[her2.stage.association.rs$stage == 'stage II'],her2.stage.association.rs$dn.score[her2.stage.association.rs$stage == 'stage III'])
 
 
-#ggplot(lumb.stage.association.rs,aes(x=stage,y=dn.score))  + geom_boxplot(lwd=1.2,outlier.shape = NA) + ggplot.style + geom_jitter(aes(x=stage,y=dn.score),size=5.5)   + ylim(-5,5)
-#ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/lumb.dn.gene.ssgsea.pdf',width = 20,height=20)
 wilcox.test(lumb.stage.association.rs$dn.score[lumb.stage.association.rs$stage == 'stage I'], lumb.stage.association.rs$dn.score[lumb.stage.association.rs$stage == 'stage II'])
 wilcox.test(lumb.stage.association.rs$dn.score[lumb.stage.association.rs$stage == 'stage I'], lumb.stage.association.rs$dn.score[lumb.stage.association.rs$stage == 'stage III'])
 wilcox.test(lumb.stage.association.rs$dn.score[lumb.stage.association.rs$stage == 'stage II'],lumb.stage.association.rs$dn.score[lumb.stage.association.rs$stage == 'stage III'])
@@ -170,13 +156,97 @@ ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/Breas
 
 
 
+
+#######################################################
+#---------------- Figure S3 --------------------------#
+######################################################
+
+
+
+#######################################################
+# FigS3 a,b,c: Visulaization of GO enrichment results for Basal, LumB and Her2-enriched
+######################################################
+
+load('client-side/output/analyze.DE.gene.R.output/analyze.DE.gene.RData')
+
+GO.enrichment.dotplot <- function(BP.df) {
+  BP.df             <- arrange(BP.df,-1 * log10(pvalue))  
+  BP.df$Description <- paste(BP.df$Description,sprintf('(%d)',BP.df$Count), sep =' ' )
+  BP.df$y           <- BP.df$Description %>% as.character()
+  BP.df$Description <- factor(BP.df$Description,levels=BP.df$y)
+  BP.df$size        <- 4
+  p <- ggplot(BP.df) +
+    geom_point(aes(x=-1 * log10(pvalue), y=Description,colour=Direction,size=size )) + scale_size(range = c(1,12)) +  # weired trick, but working!
+    scale_colour_manual(values=c('up'='red', 'dn'='blue')) +
+    theme_bw(base_size = 55) + theme(axis.title   = element_text( size=25, face="bold"),
+                                     axis.text.y  = element_text( size=35, face="bold"),
+                                     axis.text.x  = element_text(size=35, face="bold"),
+                                     plot.margin = margin(0.1, 0.1, 0.1, 0.1, "cm"),
+                                     axis.line.x = element_line(colour = "black",size = 3),
+                                     axis.line.y = element_line(colour = "black",size = 3),
+                                     legend.position = 'none')  + xlab('-log10(pvalue)') + ylab('')  
+  p
+}
+basal.dn.BP.filtered$Direction <- 'dn'
+basal.up.BP.filtered$Direction <- 'up'
+basal.BP.dotplot <- GO.enrichment.dotplot(rbind(basal.dn.BP.filtered,basal.up.BP.filtered))
+ggsave(plot = basal.BP.dotplot,filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/basal.BP.dotplot.pdf',width = 40,height=20)
+
+
+lumb.dn.BP.filtered$Direction <- 'dn'
+lumb.up.BP.filtered$Direction <- 'up'
+lumb.BP.dotplot <- GO.enrichment.dotplot(rbind(lumb.dn.BP.filtered,lumb.up.BP.filtered))
+ggsave(plot = lumb.BP.dotplot,filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/lumb.BP.dotplot.pdf',width = 40,height=20)
+
+#her2.up.BP.filtered is NA
+her2.up.BP.filtered$Direction <- 'up'
+her2.dn.BP.filtered$Direction <- 'dn'
+her2.BP.dotplot <- GO.enrichment.dotplot(rbind(her2.dn.BP.filtered,her2.up.BP.filtered))
+ggsave(plot = her2.BP.dotplot,filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/her2.BP.dotplot.pdf',width = 40,height=20)
+
+
+
+
+
+
+
+
+
+
+
+
 ######################################################
 #------------------Figure S4 ------------------------#
 ######################################################
 
 
+
+####################################################################
+#Figure S4a,b: volcanot plot for her2-enriched and luminalB subtype #
+####################################################################
+
+flag    <- her2.survival.rs.up$p.value < 0.05 & her2.survival.rs.up$effect.size > 0
+ggplot(her2.survival.rs.up) + geom_point(aes(x=effect.size, y = -1 * log10(p.value)),size=5.5) + ggplot.style + geom_point(data= her2.survival.rs.up[flag,],aes(x=effect.size, y = -1 * log10(p.value)),size=5.5,colour='red') + geom_abline(intercept =  -1 * log10(0.05),slope = 0,size = 2,linetype=2) + ylim(0,3)
+ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/her2.up.gene.driver.volcano.pdf',width = 20,height=20)
+flag     <- her2.survival.rs.dn$p.value < 0.05 & her2.survival.rs.dn$effect.size < 0
+ggplot(her2.survival.rs.dn) + geom_point(aes(x=effect.size, y = -1 * log10(p.value)),size=5.5) + ggplot.style + geom_point(data= her2.survival.rs.dn[flag,],aes(x=effect.size, y = -1 * log10(p.value)),size=5.5,colour='red') + geom_abline(intercept =  -1 * log10(0.05),slope = 0,size = 2,linetype=2) + ylim(0,3)
+ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/her2.dn.gene.suppressor.volcano.pdf',width = 20,height=20)
+
+
+
+flag    <- lumb.survival.rs.up$p.value < 0.05 & lumb.survival.rs.up$effect.size > 0
+ggplot(lumb.survival.rs.up) + geom_point(aes(x=effect.size, y = -1 * log10(p.value)),size=5.5) + ggplot.style + geom_point(data= lumb.survival.rs.up[flag,],aes(x=effect.size, y = -1 * log10(p.value)),size=5.5,colour='red') + geom_abline(intercept =  -1 * log10(0.05),slope = 0,size = 2,linetype=2) + ylim(0,3)
+ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/lumb.up.gene.driver.volcano.pdf',width = 20,height=20)
+flag     <- lumb.survival.rs.dn$p.value < 0.05 & lumb.survival.rs.dn$effect.size < 0
+ggplot(lumb.survival.rs.dn) + geom_point(aes(x=effect.size, y = -1 * log10(p.value)),size=5.5) + ggplot.style + geom_point(data= lumb.survival.rs.dn[flag,],aes(x=effect.size, y = -1 * log10(p.value)),size=5.5,colour='red') + geom_abline(intercept =  -1 * log10(0.05),slope = 0,size = 2,linetype=2) + ylim(0,3)
+ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/lumb.dn.gene.suppressor.volcano.pdf',width = 20,height=20)
+
+
+
+
+
 ######################################################
-#Figure S4 a,b: KM plot for S100B and FAT #
+#Figure S4c: KM plot for S100B#
 ######################################################
 load('client-side/output//TCGA.breast.cancer.meta.R.output//TCGA.breast.cancer.meta.RData')
 load('server-side/RData//Breast Invasive Carcinoma.RData')
@@ -221,15 +291,9 @@ draw.KM.plot <- function(g) {
 }
 
 basal.eg.dn.gene         <- 'ENSG00000160307'  # S100B
-basal.eg.up.gene         <- 'ENSG00000086570'  # FAT2
 subtype.sample           <- intersect(pure.TCGA.breast.cancer.polyA.Basal.sample,colnames(TCGA.breast.cancer.log2.fpkm.matrix))
-basal.eg.up.gene.KM.plot <- draw.KM.plot(basal.eg.up.gene)
 basal.eg.dn.gene.KM.plot <- draw.KM.plot(basal.eg.dn.gene)
 
-pdf(file ='~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/basal.eg.up.gene.KM.plot.pdf',width=20,height=15)
-print(basal.eg.up.gene.KM.plot[[1]])
-dev.off()
-basal.survival.rs.up[basal.eg.up.gene,]
 
 
 pdf(file ='~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/basal.eg.dn.gene.KM.plot.pdf',width=20,height=15)
@@ -240,57 +304,6 @@ basal.survival.rs.dn[basal.eg.dn.gene,]
 
 
 
-# subtype.sample          <- intersect(pure.TCGA.breast.cancer.polyA.Her2.sample,colnames(TCGA.breast.cancer.log2.fpkm.matrix))
-# her2.eg.up.gene.KM.plot <- draw.KM.plot(her2.eg.up.gene)
-# her2.eg.dn.gene.KM.plot <- draw.KM.plot(her2.eg.dn.gene)
-# 
-# pdf(file ='~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/her2.eg.up.gene.KM.plot.pdf',width=20,height=15)
-# print(her2.eg.up.gene.KM.plot[[1]])
-# dev.off()
-# her2.survival.rs.up[her2.eg.up.gene,]
-# 
-# pdf(file ='~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/her2.eg.dn.gene.KM.plot.pdf',width=20,height=15)
-# print(her2.eg.dn.gene.KM.plot[[1]])
-# dev.off()
-# her2.survival.rs.dn[her2.eg.dn.gene,]
-# 
-# 
-# 
-# subtype.sample          <- intersect(pure.TCGA.breast.cancer.polyA.LumB.sample,colnames(TCGA.breast.cancer.log2.fpkm.matrix))
-# lumb.eg.up.gene.KM.plot <- draw.KM.plot(lumb.eg.up.gene)
-# lumb.eg.dn.gene.KM.plot <- draw.KM.plot(lumb.eg.dn.gene)
-# 
-# pdf(file ='~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/lumb.eg.up.gene.KM.plot.pdf',width=20,height=15)
-# print(lumb.eg.up.gene.KM.plot[[1]])
-# dev.off()
-# lumb.survival.rs.up[lumb.eg.up.gene,]
-# 
-# 
-# pdf(file ='~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/lumb.eg.dn.gene.KM.plot.pdf',width=20,height=15)
-# print(lumb.eg.dn.gene.KM.plot[[1]])
-# dev.off()
-# lumb.survival.rs.dn[lumb.eg.dn.gene,]
-
-
-######################################################
-#Figure S4c,d,e,f: volcanot plot for her2-enriched and luminalB subtype -----------------------------------#
-######################################################
-
-flag    <- her2.survival.rs.up$p.value < 0.05 & her2.survival.rs.up$effect.size > 0
-ggplot(her2.survival.rs.up) + geom_point(aes(x=effect.size, y = -1 * log10(p.value)),size=5.5) + ggplot.style + geom_point(data= her2.survival.rs.up[flag,],aes(x=effect.size, y = -1 * log10(p.value)),size=5.5,colour='red') + geom_abline(intercept =  -1 * log10(0.05),slope = 0,size = 2,linetype=2) + ylim(0,3)
-ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/her2.up.gene.driver.volcano.pdf',width = 20,height=20)
-flag     <- her2.survival.rs.dn$p.value < 0.05 & her2.survival.rs.dn$effect.size < 0
-ggplot(her2.survival.rs.dn) + geom_point(aes(x=effect.size, y = -1 * log10(p.value)),size=5.5) + ggplot.style + geom_point(data= her2.survival.rs.dn[flag,],aes(x=effect.size, y = -1 * log10(p.value)),size=5.5,colour='red') + geom_abline(intercept =  -1 * log10(0.05),slope = 0,size = 2,linetype=2) + ylim(0,3)
-ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/her2.dn.gene.suppressor.volcano.pdf',width = 20,height=20)
-
-
-
-flag    <- lumb.survival.rs.up$p.value < 0.05 & lumb.survival.rs.up$effect.size > 0
-ggplot(lumb.survival.rs.up) + geom_point(aes(x=effect.size, y = -1 * log10(p.value)),size=5.5) + ggplot.style + geom_point(data= lumb.survival.rs.up[flag,],aes(x=effect.size, y = -1 * log10(p.value)),size=5.5,colour='red') + geom_abline(intercept =  -1 * log10(0.05),slope = 0,size = 2,linetype=2) + ylim(0,3)
-ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/lumb.up.gene.driver.volcano.pdf',width = 20,height=20)
-flag     <- lumb.survival.rs.dn$p.value < 0.05 & lumb.survival.rs.dn$effect.size < 0
-ggplot(lumb.survival.rs.dn) + geom_point(aes(x=effect.size, y = -1 * log10(p.value)),size=5.5) + ggplot.style + geom_point(data= lumb.survival.rs.dn[flag,],aes(x=effect.size, y = -1 * log10(p.value)),size=5.5,colour='red') + geom_abline(intercept =  -1 * log10(0.05),slope = 0,size = 2,linetype=2) + ylim(0,3)
-ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/lumb.dn.gene.suppressor.volcano.pdf',width = 20,height=20)
 
 
 
@@ -299,116 +312,6 @@ ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/Breas
 
 
 
-
-tmp <- basal.survival.rs.up[basal.survival.rs.up$p.value < 0.05 ,]
-tmp <- tmp[order(tmp$p.value),]
-sum(tmp$effect.size > 0) / nrow(tmp)
-basal.eg.up.gene <- 'ENSG00000103253'
-
-
-tmp <- her2.survival.rs.up[her2.survival.rs.up$p.value < 0.05 ,]
-tmp <- tmp[order(tmp$p.value),]
-sum(tmp$effect.size > 0) / nrow(tmp)
-her2.eg.up.gene <- 'ENSG00000156453'
-
-
-tmp <- lumb.survival.rs.up[lumb.survival.rs.up$p.value < 0.05 ,]
-tmp <- tmp[order(tmp$p.value),]
-sum(tmp$effect.size > 0) / nrow(tmp)
-lumb.eg.up.gene <- 'ENSG00000132613'
-
-
-tmp <- basal.survival.rs.dn[basal.survival.rs.dn$p.value < 0.05 ,]
-tmp <- tmp[order(tmp$p.value),]
-sum(tmp$effect.size < 0) / nrow(tmp)
-basal.eg.dn.gene <- 'ENSG00000160307'
-
-
-tmp <- her2.survival.rs.dn[her2.survival.rs.dn$p.value < 0.05 ,]
-tmp <- tmp[order(tmp$p.value),]
-sum(tmp$effect.size < 0) / nrow(tmp)
-her2.eg.dn.gene <- 'ENSG00000182326'
-
-
-tmp <- lumb.survival.rs.dn[lumb.survival.rs.dn$p.value < 0.05 ,]
-tmp <- tmp[order(tmp$p.value),]
-sum(tmp$effect.size < 0) / nrow(tmp)
-lumb.eg.dn.gene <- 'ENSG00000188001'
-
-
-
-
-
-
-
-
-#######################################################
-# FigS3 a,b,c: Visulaization of GO enrichment results for Basal
-######################################################
-load('client-side/output/analyze.DE.gene.R.output/analyze.DE.gene.RData')
-
-GO.enrichment.dotplot <- function(BP.df) {
-  BP.df             <- arrange(BP.df,-1 * log10(pvalue))  
-  BP.df$Description <- paste(BP.df$Description,sprintf('(%d)',BP.df$Count), sep =' ' )
-  BP.df$y           <- BP.df$Description %>% as.character()
-  BP.df$Description <- factor(BP.df$Description,levels=BP.df$y)
-  BP.df$size        <- 4
-  p <- ggplot(BP.df) +
-    geom_point(aes(x=-1 * log10(pvalue), y=Description,colour=Direction,size=size )) + scale_size(range = c(1,12)) +  # weired trick, but working!
-    scale_colour_manual(values=c('up'='red', 'dn'='blue')) +
-    theme_bw(base_size = 55) + theme(axis.title   = element_text( size=25, face="bold"),
-                                     axis.text.y  = element_text( size=35, face="bold"),
-                                     axis.text.x  = element_text(size=35, face="bold"),
-                                     plot.margin = margin(0.1, 0.1, 0.1, 0.1, "cm"),
-                                     axis.line.x = element_line(colour = "black",size = 3),
-                                     axis.line.y = element_line(colour = "black",size = 3),
-                                     legend.position = 'none')  + xlab('-log10(pvalue)') + ylab('')  
-  p
-}
-basal.dn.BP.filtered$Direction <- 'dn'
-basal.up.BP.filtered$Direction <- 'up'
-basal.BP.dotplot <- GO.enrichment.dotplot(rbind(basal.dn.BP.filtered,basal.up.BP.filtered))
-ggsave(plot = basal.BP.dotplot,filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/basal.BP.dotplot.pdf',width = 40,height=20)
-
-
-lumb.dn.BP.filtered$Direction <- 'dn'
-lumb.up.BP.filtered$Direction <- 'up'
-lumb.BP.dotplot <- GO.enrichment.dotplot(rbind(lumb.dn.BP.filtered,lumb.up.BP.filtered))
-ggsave(plot = lumb.BP.dotplot,filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/lumb.BP.dotplot.pdf',width = 40,height=20)
-
-#her2.up.BP.filtered is NA
-her2.up.BP.filtered$Direction <- 'up'
-her2.dn.BP.filtered$Direction <- 'dn'
-her2.BP.dotplot <- GO.enrichment.dotplot(rbind(her2.dn.BP.filtered,her2.up.BP.filtered))
-ggsave(plot = her2.BP.dotplot,filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/her2.BP.dotplot.pdf',width = 40,height=20)
-
-
-
-
-
-
-
-####################################################### Trash ####################################################### 
-#######################################################
-# FigS2a: Bar plot to show subtype-sepcificity of DE genes
-######################################################
-# up.gene <- c(lumb.up.gene,her2.up.gene,basal.up.gene)
-# dn.gene <- c(lumb.dn.gene,her2.dn.gene,basal.dn.gene)
-# 
-# up.gene.freq.df <- table(up.gene) %>% as.data.frame
-# dn.gene.freq.df <- table(dn.gene) %>% as.data.frame
-# up.gene.freq.df$color <- 'up'
-# dn.gene.freq.df$color <- 'dn'
-# colnames(up.gene.freq.df)[1] <- 'gene'
-# colnames(dn.gene.freq.df)[1] <- 'gene'
-# 
-# ggplot(rbind(up.gene.freq.df,dn.gene.freq.df)) + 
-#   geom_bar( aes( x=factor(Freq),fill=color),position= 'dodge') + 
-#   ggplot.style + 
-#   xlab('Number of subtypes') + 
-#   scale_fill_manual(values=c('up'='red','dn'='blue'))
-# 
-# ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section2/DE.gene.subtype.specificity.pdf',width = 20,height=20)
 
 
 

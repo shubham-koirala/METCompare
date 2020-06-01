@@ -126,7 +126,7 @@ ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/Breas
 
 
 #################################################################
-#### Fig S6a  boxplot of NOTCH3 cnv in Her2 and LuminalB subtype
+#### Fig S6c  boxplot of NOTCH3 cnv in Her2 and LuminalB subtype
 #################################################################
 MET500.liver.sample  <- rownames(MET500.sample.meta)[MET500.sample.meta$biopsy.site == 'LIVER'] 
 MET500.sample        <- MET500.breast.cancer.polyA.LumB.sample
@@ -160,46 +160,10 @@ wilcox.test(MET500.breast.cancer.cnv.matrix['NOTCH3',MET500.subject.id],TCGA.bre
 ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section4/NOTCH3.cnv.her2.pdf',width = 20,height=20)
 
 
-#################################################################
-#### Fig S5b  boxplot of HES1 and HES4 expr in  Basal-like subtype
-#################################################################
-
-load('client-side/output//TCGA.breast.cancer.meta.R.output//TCGA.breast.cancer.meta.RData')
-load('~/Project/Cancer2CellLine/client-side/output//MET500.breast.cancer.meta.R.output//MET500.breast.cancer.meta.RData')
-load('~/Project/Cancer2CellLine/server-side/RData/MET500.RData')
-load('server-side/RData//Breast Invasive Carcinoma.RData')
-load('client-side/output/estimate.hepatocytes.abundance.R.output/estimate.hepatocytes.abundance.RData')
-
-
-TCGA.breast.cancer.log2.fpkm.matrix       <- log2.fpkm.matrix
-MET500.liver.sample                       <- rownames(MET500.sample.meta)[MET500.sample.meta$biopsy.site == 'LIVER'] 
-MET500.sample  <- MET500.breast.cancer.polyA.Basal.sample
-MET500.sample  <- intersect(MET500.sample,MET500.liver.sample)
-MET500.sample  <- MET500.sample[hepatocyte.abundance.vec[MET500.sample] < 0.2]
-TCGA.sample    <- pure.TCGA.breast.cancer.polyA.Basal.sample
-
-HES1 <- 'ENSG00000114315'
-df1 <- data.frame(expr=MET500.log2.fpkm.matrix[HES1,MET500.sample],condition='MET500')
-df2 <- data.frame(expr=TCGA.breast.cancer.log2.fpkm.matrix[HES1,TCGA.sample],condition='TCGA')
-df <- rbind(df1,df2)
-df$condition <- factor(df$condition,levels = c('TCGA','MET500'))
-ggplot(df) + geom_boxplot(aes(x=condition,y=expr),outlier.shape=NA,lwd=3) + ggplot.style + geom_jitter(aes(x=condition,y=expr),size=5.5) + xlab('') 
-wilcox.test(df1$expr,df2$expr)
-ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section4/HES1.DE.pdf',width = 20,height=20)
-
-
-HES4 <- 'ENSG00000188290'
-df1 <- data.frame(expr=MET500.log2.fpkm.matrix[HES4,MET500.sample],condition='MET500')
-df2 <- data.frame(expr=TCGA.breast.cancer.log2.fpkm.matrix[HES4,TCGA.sample],condition='TCGA')
-df <- rbind(df1,df2)
-df$condition <- factor(df$condition,levels = c('TCGA','MET500'))
-ggplot(df) + geom_boxplot(aes(x=condition,y=expr),outlier.shape=NA,lwd=3) + ggplot.style + geom_jitter(aes(x=condition,y=expr),size=5.5) + xlab('') 
-wilcox.test(df1$expr,df2$expr)
-ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section4/HES4.DE.pdf',width = 20,height=20)
 
 
 ########################################################################
-### Fig S5c valcano plot of SRP157974
+### Fig S6d valcano plot of SRP157974
 ############################################################################
 NOTCH3.df <- SRP157974.HES4.high.vs.low.res[rownames(SRP157974.HES4.high.vs.low.res) == NOTCH3,]
 ggplot() + geom_point(data=SRP157974.HES4.high.vs.low.res,aes(x=log2FoldChange,y= -1 * log10(padj)),size=2.5) + ggplot.style + ylim(0,15) + geom_point(data=NOTCH3.df,aes(x=log2FoldChange,y= -1 * log10(padj)),size=7.5,color='red')
@@ -209,7 +173,7 @@ ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/Breas
 
 
 ########################################################################
-### Fig S5d  scatter plot NOTCH3-HES4 across CCLE TNBC cell lines
+### Fig S6d  scatter plot NOTCH3-HES4 across CCLE TNBC cell lines
 ############################################################################
 load('~/Project/Cancer2CellLine/client-side/output/CCLE.breast.cancer.cell.line.meta.R.output/CCLE.breast.cancer.cell.line.meta.RData')
 load('~/Project/Cancer2CellLine/server-side/RData/CCLE.RData')
@@ -225,18 +189,4 @@ ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/Breas
 cor(draw.df$NOTCH3,draw.df$HES4,method='spearman')
 
 
-#################################################################
-#### Fig S5e  boxplot of HES4 brain metastsis
-#################################################################
-MET500.brain.sample <- rownames(MET500.sample.meta)[MET500.sample.meta$biopsy.site == 'BRAIN'] 
-MET500.sample       <- c(MET500.breast.cancer.polyA.Basal.sample)
-MET500.sample       <- intersect(MET500.sample,MET500.brain.sample)
-
-TCGA.sample    <- pure.TCGA.breast.cancer.polyA.Basal.sample
-df1            <- data.frame(expr=TCGA.breast.cancer.log2.fpkm.matrix[HES4,TCGA.sample],condition='TCGA')
-df2            <- data.frame(expr=MET500.log2.fpkm.matrix[HES4,MET500.sample],          condition='MET500')
-draw.df <- rbind(df1,df2)
-ggplot(draw.df) + geom_boxplot(aes(x=condition,y=expr),outlier.shape=NA,lwd=1.2) + ggplot.style + geom_jitter(aes(x=condition,y=expr),size=4.5) + xlab('') + ylim(0,9)
-ggsave(filename = '~/OneDrive/OneDrive - Michigan State University/Project/BreastCancerMetaPotenial/Manuscript/Manuscript/section.Figure/Section4/HES4.brain.metastasis.pdf',width = 20,height=20)
-wilcox.test(df1$expr,df2$expr)
 
