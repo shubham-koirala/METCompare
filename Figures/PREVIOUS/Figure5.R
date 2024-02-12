@@ -1,5 +1,4 @@
-@ -1,369 +0,0 @@
-  require(ggplot2)
+require(ggplot2)
 source('client-side/code/Manuscript/ggplot.style.R')
 
 
