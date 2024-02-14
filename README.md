@@ -13,7 +13,9 @@ There are three subfolders in Anlaysis folder.
 
 ### **1. BULK**
 
-#### **• SAMPLE_SELECTION :** It includes code used for selecting transcriptomic data of primary and metastatic site for  various cancers. The main datasets used are: 
+#### **• SAMPLE_SELECTION :** 
+
+It includes code used for selecting transcriptomic data of primary and metastatic site for  various cancers. The main datasets used are: 
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a.TCGA https://github.com/BioinformaticsFMRP/TCGAbiolinks/
 
@@ -29,21 +31,25 @@ There are three subfolders in Anlaysis folder.
 
 Some of these datasets are available in our OCTAD database. https://github.com/Bin-Chen-Lab/octad.
 
-#### **• DE (Differential Expression Analysis) :** It includes code used to perform DE analysis using DEBoost method.
+#### **• DE (Differential Expression Analysis) :** 
+It includes code used to perform DE analysis using DEBoost method.
 
-#### **• DOWNSTREAM:** It includes pathway analysis done using differentially expressed genes.
+#### **• DOWNSTREAM:** 
+It includes pathway analysis done using differentially expressed genes.
 
-### **2. SINGLE_CELL** : It includes following code files 
+### **2. SINGLE_CELL** 
+It includes following code files 
 
 &nbsp;&nbsp;&nbsp;&nbsp;a.for building liver metastasis single cell atlas by integrating various single cell datasets (scArches). The liver metastasis single cell atlas can be downloaded from 
-&nbsp;&nbsp;&nbsp;&nbsp;https://chenlab-data-public.s3.us-west2.amazonaws.com/LIVER_METASTASIS_ATLAS/Chen_LiverMetastasis_new.RData.
+https://chenlab-data-public.s3.us-west2.amazonaws.com/LIVER_METASTASIS_ATLAS/Chen_LiverMetastasis_new.RData.
    
 &nbsp;&nbsp;&nbsp;&nbsp;b.sample code for inferring malignant cells from single cell atals (InferCNV)
    
 &nbsp;&nbsp;&nbsp;&nbsp;c.differential gene expression code used to generate ‘Primary vs Metastatic singnature’ by comparing only malignant cells (predicted by InferCNV using liver metastasis single cell atlas)
    
     
-### **3. DRUG_STUDY** : It includes data and code files:
+### **3. DRUG_STUDY** 
+It includes data and code files:
 
 &nbsp;&nbsp;&nbsp;&nbsp;a.For predicting drugs which could induce primary to metastasis transformation. (It utilizes signatures created using liver metastasis single cell atlas)
    
