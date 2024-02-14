@@ -17,17 +17,17 @@ There are three subfolders in Anlaysis folder.
 
 It includes code used for selecting transcriptomic data of primary and metastatic site for  various cancers. The main datasets used are: 
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a.TCGA https://github.com/BioinformaticsFMRP/TCGAbiolinks/
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. TCGA https://github.com/BioinformaticsFMRP/TCGAbiolinks/
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b.MET500 https://xenabrowser.net/datapages/?cohort=MET500%20(expression%20centric
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. MET500 https://xenabrowser.net/datapages/?cohort=MET500%20(expression%20centric
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c.CCLE https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE36133
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c. CCLE https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE36133
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d.GEPNET https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE98894
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d. GEPNET https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE98894
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e.Colorectal Cancer https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE50760
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e. Colorectal Cancer https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE50760
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f.Prostate Cancer https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE147250
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f. Prostate Cancer https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE147250
 
 Some of these datasets are available in our OCTAD database. https://github.com/Bin-Chen-Lab/octad.
 
@@ -40,20 +40,20 @@ It includes pathway analysis done using differentially expressed genes.
 ### **2. SINGLE_CELL** 
 It includes following code files 
 
-&nbsp;&nbsp;&nbsp;&nbsp;a.for building liver metastasis single cell atlas by integrating various single cell datasets (scArches). The liver metastasis single cell atlas can be downloaded from 
+&nbsp;&nbsp;&nbsp;&nbsp;a. for building liver metastasis single cell atlas by integrating various single cell datasets (scArches). The liver metastasis single cell atlas can be downloaded from 
 https://chenlab-data-public.s3.us-west2.amazonaws.com/LIVER_METASTASIS_ATLAS/Chen_LiverMetastasis_new.RData.
    
-&nbsp;&nbsp;&nbsp;&nbsp;b.sample code for inferring malignant cells from single cell atals (InferCNV)
+&nbsp;&nbsp;&nbsp;&nbsp;b. Sample code for inferring malignant cells from single cell atals (InferCNV)
    
-&nbsp;&nbsp;&nbsp;&nbsp;c.differential gene expression code used to generate ‘Primary vs Metastatic singnature’ by comparing only malignant cells (predicted by InferCNV using liver metastasis single cell atlas)
+&nbsp;&nbsp;&nbsp;&nbsp;c. Differential gene expression code used to generate ‘Primary vs Metastatic singnature’ by comparing only malignant cells (predicted by InferCNV using liver metastasis single cell atlas)
    
     
 ### **3. DRUG_STUDY** 
 It includes data and code files:
 
-&nbsp;&nbsp;&nbsp;&nbsp;a.For predicting drugs which could induce primary to metastasis transformation. (It utilizes signatures created using liver metastasis single cell atlas)
+&nbsp;&nbsp;&nbsp;&nbsp;a. For predicting drugs which could induce primary to metastasis transformation. (It utilizes signatures created using liver metastasis single cell atlas)
    
-&nbsp;&nbsp;&nbsp;&nbsp;b.Possible role of antidiabetic drug Sitagliptin in Pancreatic cancer metastasis which utilizes FDA Adverse Event Reporting System (FAERS) data.
+&nbsp;&nbsp;&nbsp;&nbsp;b. Possible role of antidiabetic drug Sitagliptin in Pancreatic cancer metastasis which utilizes FDA Adverse Event Reporting System (FAERS) data.
 
 
 All R scripts were tested on R (version 4.1.1). Even R (version 3.5.1) is suitable to execute the codes. 
