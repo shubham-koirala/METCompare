@@ -94,4 +94,4 @@ for (i in 1:length(ds))
    }
 }
 
-##### The Signatures and pathway analysis data is provided in Single_Cell_DE_Primary_vs_Metastasis.zip
+##### The Signatures and pathway analysis data is provided in Primary_vs_Metastasis_DE.zip
