@@ -29,7 +29,8 @@ There are three subfolders in the `Analysis` folder:
 
 2. **SINGLE_CELL**
    - Code files:
-     - For building a liver metastasis single-cell atlas by integrating various single-cell datasets (scArches). The liver metastasis single-cell atlas can be downloaded from [here](https://chenlab-data-public.s3.us-west2.amazonaws.com/LIVER_METASTASIS_ATLAS/Chen_LiverMetastasis_new.RData).
+     - For building a liver metastasis single-cell atlas by integrating various single-cell datasets (scArches). The liver metastasis single-cell atlas can be downloaded from [here](https://chenlab-data-public.s3.us-west-2.amazonaws.com/LIVER_METASTASIS_ATLAS/Chen_LiverMetastasis_new.RData![image](https://github.com/Bin-Chen-Lab/METCompare/assets/33744933/5911b691-e39f-46d1-9f6e-fb74ebbae3f6)
+).
      - Sample code for inferring malignant cells from the single-cell atlas (InferCNV).
      - Differential gene expression code used to generate the "Primary vs Metastatic signature" by comparing only malignant cells (predicted by InferCNV using the liver metastasis single-cell atlas).
 
