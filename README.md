@@ -7,37 +7,49 @@ The comparison of nine cancer types revealed that cancers exhibit distinct trans
 We also created a liver metastases single-cell atlas consisting of 750,000 cells. By comparing the single cell transcriptome between primary and metastatic site, we predicted drugs that could induce transformation from primary state to liver metastasis state. Among these drugs, we   discovered   that   the   anti-diabetic   drug   sitagliptin   might   promote pancreatic cancer liver metastasis. 
 Further analysis of drug adverse effect reports confirmed that sitagliptin has a significantly higher reporting odds ratio of pancreatic cancer and liver metastasis than other anti-diabetic drugs including metformin. 
 
-Repository structure
+**Repository structure**
 There are three subfolders in Anlaysis folder.
-1. BULK
 
-         • SAMPLE_SELECTION  : It includes code used for selecting transcriptomic data of primary and metastatic site for  various cancers.
-                               The main datasets used are: 
+
+**1. BULK**
+
+  • SAMPLE_SELECTION : It includes code used for selecting transcriptomic data of primary and metastatic site for  various cancers.
+                     The main datasets used are: 
           
-                    a.TCGA (https://github.com/BioinformaticsFMRP/TCGAbiolinks)
-                    b.MET500 (https://xenabrowser.net/datapages/?cohort=MET500%20(expression%20centric)
-                    c.CCLE(https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE36133)
-  	                d.GEPNET (https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE98894)
-                    e.Colorectal Cancer (https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE50760)
-                    f.Prostate Cancer (https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE147250)
-                      Some of these datasets are available in our OCTAD database. https://github.com/Bin-Chen-Lab/octad.
+       a.TCGA ([https://github.com/BioinformaticsFMRP/TCGAbiolinks](https://github.com/BioinformaticsFMRP/TCGAbiolinks))
+   
+       b.MET500 (https://xenabrowser.net/datapages/?cohort=MET500%20(expression%20centric)
+   
+       c.CCLE(https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE36133)
+   
+  	   d.GEPNET (https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE98894)
+   
+       e.Colorectal Cancer (https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE50760)
+   
+       f.Prostate Cancer (https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE147250)
 
-        • DE (Differential Expression Analysis) : It includes code used to perform DE analysis using DEBoost method.
+    Some of these datasets are available in our OCTAD database. https://github.com/Bin-Chen-Lab/octad.
+       
+• DE (Differential Expression Analysis) : It includes code used to perform DE analysis using DEBoost method.
 
-        • DOWNSTREAM: It includes pathway analysis done using differentially expressed genes.
+• DOWNSTREAM: It includes pathway analysis done using differentially expressed genes.
 
-2. SINGLE_CELL : It includes following code files 
+   
+**2. SINGLE_CELL** : It includes following code files 
 
-              a.for building liver metastasis single cell atlas by integrating various single cell datasets.(scArches)
-              b.sample code for inferring malignant cells from single cell atals (InferCNV)
-              c.differential gene expression code used to generate ‘Primary vs Metastatic singnature’ by comparing only malignant cells (predicted by InferCNV using liver metastasis single cell atlas)
-              The liver metastasis single cell atlas can be downloaded from  https://chenlab-data-public.s3.us-west2.amazonaws.com/LIVER_METASTASIS_ATLAS/Chen_LiverMetastasis_new.RData.
+    a.for building liver metastasis single cell atlas by integrating various single cell datasets.(scArches)
+      The liver metastasis single cell atlas can be downloaded from  https://chenlab-data-public.s3.us-west2.amazonaws.com/LIVER_METASTASIS_ATLAS/Chen_LiverMetastasis_new.RData.
+   
+    b.sample code for inferring malignant cells from single cell atals (InferCNV)
+   
+    c.differential gene expression code used to generate ‘Primary vs Metastatic singnature’ by comparing only malignant cells (predicted by InferCNV using liver metastasis single cell atlas)
    
     
-3. DRUG_STUDY : It includes data and code files:
+**3. DRUG_STUDY ** : It includes data and code files:
 
-           a.For predicting drugs which could induce primary to metastasis transformation. (It utilizes signatures created using liver metastasis single cell atlas)
-           b.Possible role of antidiabetic drug Sitagliptin in Pancreatic cancer metastasis which utilizes FDA Adverse Event Reporting System (FAERS) data.
+    a.For predicting drugs which could induce primary to metastasis transformation. (It utilizes signatures created using liver metastasis single cell atlas)
+   
+    b.Possible role of antidiabetic drug Sitagliptin in Pancreatic cancer metastasis which utilizes FDA Adverse Event Reporting System (FAERS) data.
 
 
 All R scripts were tested on R (version 4.1.1). Even R (version 3.5.1) is suitable to execute the codes. 
