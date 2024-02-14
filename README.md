@@ -13,7 +13,7 @@ Among these drugs, we   discovered   that   the  anti-diabetic   drug   sitaglip
 Further analysis of drug adverse effect reports confirmed that sitagliptin has a significantly higher reporting odds ratio of pancreatic cancer and liver metastasis than other anti-diabetic drugs including metformin. 
 
 ## **Repository Structure**
-There are three subfolders in Anlaysis folder.
+There are three subfolders in Analysis folder.
 
 
 ### **1. BULK**
