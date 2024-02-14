@@ -43,9 +43,9 @@ It includes following code files
 &nbsp;&nbsp;&nbsp;&nbsp;a. for building liver metastasis single cell atlas by integrating various single cell datasets (scArches). The liver metastasis single cell atlas can be downloaded from 
 https://chenlab-data-public.s3.us-west2.amazonaws.com/LIVER_METASTASIS_ATLAS/Chen_LiverMetastasis_new.RData.
    
-&nbsp;&nbsp;&nbsp;&nbsp;b. Sample code for inferring malignant cells from single cell atals (InferCNV)
+&nbsp;&nbsp;&nbsp;&nbsp;b. Sample code for inferring malignant cells from single cell atals (InferCNV).
    
-&nbsp;&nbsp;&nbsp;&nbsp;c. Differential gene expression code used to generate ‘Primary vs Metastatic singnature’ by comparing only malignant cells (predicted by InferCNV using liver metastasis single cell atlas)
+&nbsp;&nbsp;&nbsp;&nbsp;c. Differential gene expression code used to generate ‘Primary vs Metastatic singnature’ by comparing only malignant cells (predicted by InferCNV using liver metastasis single cell atlas).
    
     
 ### **3. DRUG_STUDY** 
