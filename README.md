@@ -3,11 +3,11 @@
 
 We conducted a pan-cancer analysis of liver metastases, focusing on the transcriptional changes in cancer cells between primary and metastatic sites.
 
-We first performed a systematic comparison of transcriptomic features across bulk and single-cell transcriptomics, highlighting the necessity of incorporating both types of transcriptomics. We then developed a novel tool called "DEBoost" for computing differentially expressed genes in cancer cells from bulk RNA-seq data. The comparison of nine cancer types revealed that cancers exhibit distinct transcriptional changes in liver metastasis while they share some patterns. Notably, cancer cells could partially mimic the secretome of hepatocytes by selectively expressing liver-specific genes in both primary and metastatic sites.
+We first performed a systematic comparison of transcriptomic features across bulk and single-cell transcriptomics, highlighting the necessity of incorporating both types of transcriptomics. We then developed a tool called "DEBoost" for computing differentially expressed genes in cancer cells from bulk RNA-seq data. The comparison of nine cancer types revealed that cancers exhibit distinct transcriptional changes in liver metastasis while they share some patterns. Notably, cancer cells could partially mimic the secretome of hepatocytes by selectively expressing liver-specific genes in both primary and metastatic sites.
 
 We also created a liver metastases single-cell atlas consisting of 750,000 cells. By comparing the single-cell transcriptome between primary and metastatic sites, we predicted drugs that could induce transformation from the primary state to the liver metastasis state.
 
-Among these drugs, we discovered that the anti-diabetic drug sitagliptin might promote pancreatic cancer liver metastasis. Further analysis of drug adverse effect reports confirmed that sitagliptin has a significantly higher reporting odds ratio of pancreatic cancer and liver metastasis than other anti-diabetic drugs, including metformin.
+Among these drugs, we discovered that the anti-diabetic drug sitagliptin might promote pancreatic cancer liver metastasis. Further analysis of drug adverse effect reports confirmed that sitagliptin has a significantly higher reporting odds ratio of pancreatic cancer and liver metastasis than other anti-diabetic drugs.
 
 ## Repository Structure
 
@@ -25,7 +25,7 @@ There are three subfolders in the `Analysis` folder:
    Some of these datasets are available in our OCTAD database ([link](https://github.com/Bin-Chen-Lab/octad)).
 
    - **DE (Differential Expression Analysis)**: Code used to perform DE analysis using the DEBoost method.
-   - **DOWNSTREAM**: Pathway analysis done using differentially expressed genes.
+   - **DOWNSTREAM**: Pathway analysis using differentially expressed genes.
 
 2. **SINGLE_CELL**
    - Code files:
