@@ -1,0 +1,285 @@
+# In this section we are simulating bulk RNA seq datset using single cell RNA seq to validate DEBoost.
+
+setwd('Desktop/Research/Chenlab/Liver Metastasis/updated_simulation/')
+library(Seurat)
+library(dplyr)
+library(ggplot2)
+library(SingleR)
+library(celldex)
+library(Matrix)
+
+######################## Prepare necessary functions here ######################
+preprocess_seurat <- function(seurat_obj) {
+  seurat_obj <- NormalizeData(seurat_obj)
+  seurat_obj <- FindVariableFeatures(seurat_obj)
+  seurat_obj <- ScaleData(seurat_obj)
+  seurat_obj <- RunPCA(seurat_obj)
+  seurat_obj <- RunUMAP(seurat_obj, reduction = 'pca', dims = 1:50)
+  seurat_obj <- FindNeighbors(seurat_obj, reduction = "umap", dims = 1:2)
+  seurat_obj <- FindClusters(seurat_obj, resolution = 0.1)
+  return(seurat_obj)
+}
+
+gene_length <- read.csv('../gencode.v23.annotation.csv')
+gene_length <- gene_length[,c('gene', 'gene_length', 'ensembl')]
+rownames(gene_length) <- make.unique(gene_length$gene)
+calculate_read_counts <- function(tpm_df) {
+  gene_length_df <- gene_length
+  genes <- rownames(tpm_df)
+  
+  gene_length_df <- aggregate(gene_length ~ gene, data = gene_length_df, FUN = mean)
+  gene_lengths_df <- gene_length_df[gene_length_df$gene %in% genes, c("gene", "gene_length")]
+  
+  rownames(gene_lengths_df) <- gene_lengths_df$gene
+  gene_lengths_df <- gene_lengths_df[ , "gene_length", drop = FALSE]
+  common_genes <- intersect(rownames(tpm_df), rownames(gene_lengths_df))
+  
+  tpm_df <- tpm_df[common_genes, , drop = FALSE]
+  gene_lengths_df <- gene_lengths_df[common_genes, , drop = FALSE]
+  read_counts <- tpm_df * gene_lengths_df$gene_length / 1e6
+  return(read_counts)
+}
+
+ref <- celldex::HumanPrimaryCellAtlasData()
+annotate_singleR <- function(seurat_obj, ref) {
+  singleR_results <- SingleR(test = GetAssayData(seurat_obj, slot = "counts"), ref = ref, labels = ref$label.main)
+  seurat_obj <- AddMetaData(seurat_obj, metadata = singleR_results$labels, col.name = "SingleR_label")
+  print(table(seurat_obj@meta.data$SingleR_label))
+  return(seurat_obj)
+}
+
+subset_seurat <- function(seurat_obj, desired_proportion) {
+  total_cells <- ncol(seurat_obj)
+  selected_cells <- c()
+  # Loop over each cell type and sample based on proportion
+  for (cell_type in names(desired_proportion)) {
+    cell_type_cells <- WhichCells(seurat_obj, expression = SingleR_label == cell_type)
+    num_cells_to_sample <- min(round(desired_proportion[cell_type] * total_cells), length(cell_type_cells))
+    selected_cells <- c(selected_cells, sample(cell_type_cells, num_cells_to_sample))
+  }
+  seurat_subset <- subset(seurat_obj, cells = selected_cells)
+  print(dim(seurat_subset))
+  return(seurat_subset)
+}
+
+create_pseudobulk <- function(seurat_obj, num_patients, cells_per_patient) {
+  cell_assignments <- replicate(num_patients, sample(Cells(seurat_obj), cells_per_patient, replace = TRUE), simplify = FALSE) # Randomly assign cells to each patient
+  counts_data <- GetAssayData(seurat_obj, slot = "counts") # Extract counts data from Seurat object
+  
+  # Initialize matrix to store pseudobulk data
+  gene_names <- rownames(counts_data)
+  pseudobulk_matrix <- matrix(0, nrow = length(gene_names), ncol = num_patients)
+  rownames(pseudobulk_matrix) <- gene_names
+  colnames(pseudobulk_matrix) <- paste0("Patient_", 1:num_patients)
+  
+  # Aggregate counts for each patient
+  for (i in 1:num_patients) {
+    patient_cells <- cell_assignments[[i]] # Get the cells assigned to the current patient
+    patient_data <- counts_data[, patient_cells, drop = FALSE] # Subset the counts data for these cells and compute row sums
+    pseudobulk_matrix[, i] <- rowSums(patient_data)
+  }
+  pseudobulk_df <- as.data.frame(pseudobulk_matrix)
+  return(pseudobulk_df)
+}
+
+create_pseudobulk_old <- function(seurat_obj, num_patients, cells_per_patient) {
+  cell_assignments <- replicate(num_patients, sample(Cells(seurat_obj), cells_per_patient, replace = TRUE))
+  pseudobulk_matrix <- sapply(1:num_patients, function(i) {
+    rowSums(GetAssayData(subset(seurat_obj, cells = cell_assignments[, i]), slot = "counts"))
+  })
+  return(as.data.frame(pseudobulk_matrix))
+}
+################################################################################
+
+
+
+######################## Prepare and process single cell data ##################
+# For reference: GSE115469
+ref_RDS_data <- readRDS('ref_GSE115469/GSE115469_Normalized_with_annotation.RDS')
+ref_counts <- GetAssayData(ref_RDS_data, layer = 'counts')
+ref_seurat_obj <- CreateSeuratObject(counts = ref_counts, project = 'ref_GSE115469', min.features = 100, min.cells = 100, assay = 'RNA')
+
+process_data <- function(dir) {
+  counts <- as.matrix(readMM(paste0(dir, "/matrix.mtx")))
+  features <- read.csv(paste0(dir, "/features.tsv"), sep = '\t', header = FALSE, row.names = 1)
+  barcodes <- read.csv(paste0(dir, "/barcodes.tsv"), header = FALSE)
+  rownames(counts) <- features$V2
+  colnames(counts) <- barcodes$V1
+  return(counts)
+}
+# For primary: GSE225857
+pri_counts_list <- list()
+for (i in 1:4) {
+  dir <- paste0("pri_GSE225857/C", i)
+  pri_counts_list[[paste0("C", i)]] <- process_data(dir)
+}
+pri_combined_counts <- do.call(cbind, pri_counts_list)
+rownames(pri_combined_counts) <- make.unique(rownames(pri_combined_counts))
+colnames(pri_combined_counts) <- make.unique(colnames(pri_combined_counts))
+pri_seurat_obj <- CreateSeuratObject(counts = pri_combined_counts, project = 'pri_GSE225857', min.features = 100, min.cells = 100, assay = 'RNA')
+
+# For metastasis: GSE225857
+met_counts_list <- list()
+for (i in 1:2) {
+  dir <- paste0("met_GSE225857/L", i)
+  met_counts_list[[paste0("C", i)]] <- process_data(dir)
+}
+met_combined_counts <- do.call(cbind, met_counts_list)
+rownames(met_combined_counts) <- make.unique(rownames(met_combined_counts))
+colnames(met_combined_counts) <- make.unique(colnames(met_combined_counts))
+met_seurat_obj <- CreateSeuratObject(counts = met_combined_counts, project = 'met_GSE225857', min.features = 100, min.cells = 100, assay = 'RNA')
+
+ref_seurat_obj <- preprocess_seurat(ref_seurat_obj)
+pri_seurat_obj <- preprocess_seurat(pri_seurat_obj)
+met_seurat_obj <- preprocess_seurat(met_seurat_obj)
+
+DimPlot(ref_seurat_obj, reduction = "umap", label = TRUE)
+DimPlot(pri_seurat_obj, reduction = "umap", label = TRUE)
+DimPlot(met_seurat_obj, reduction = "umap", label = TRUE)
+################################################################################
+
+
+
+########################  Annotate cells using SingleR #########################
+ref_seurat_obj <- annotate_singleR(ref_seurat_obj, ref)
+pri_seurat_obj <- annotate_singleR(pri_seurat_obj, ref)
+met_seurat_obj <- annotate_singleR(met_seurat_obj, ref)
+
+DimPlot(ref_seurat_obj, reduction = "umap", group.by = 'SingleR_label')
+DimPlot(pri_seurat_obj, reduction = "umap", group.by = 'SingleR_label')
+DimPlot(met_seurat_obj, reduction = "umap", group.by = 'SingleR_label')
+
+save(ref_seurat_obj, pri_seurat_obj, met_seurat_obj, file = 'Seurat_processed_annotated.RData')
+################################################################################
+
+
+
+######################## Prepare CIBERSORTx inputs > Run CIBERSORTx ############
+# Prepare
+ref_sc_matrix <- as.data.frame(ref_seurat_obj@assays$RNA$counts)
+singleR_labels <- ref_seurat_obj@meta.data$SingleR_label
+colnames(ref_sc_matrix) <- singleR_labels
+write.table(ref_sc_matrix, file = 'CIBERSORTx/ref_sc.txt', sep = '\t', quote = FALSE)
+
+pri_sc_matrix <- as.data.frame(pri_seurat_obj@assays$RNA$counts)
+singleR_labels <- pri_seurat_obj@meta.data$SingleR_label
+colnames(pri_sc_matrix) <- singleR_labels
+write.table(pri_sc_matrix, file = 'CIBERSORTx/pri_sc.txt', sep = '\t', quote = FALSE)
+
+met_sc_matrix <- as.data.frame(met_seurat_obj@assays$RNA$counts)
+singleR_labels <- met_seurat_obj@meta.data$SingleR_label
+colnames(met_sc_matrix) <- singleR_labels
+write.table(met_sc_matrix, file = 'CIBERSORTx/met_sc.txt', sep = '\t', quote = FALSE)
+
+# Run
+ref_cbx_out <- read.csv('CIBERSORTx/ref_output.csv', row.names = 1)
+ref_cbx_out_mesns <- as.data.frame(sort(colMeans(ref_cbx_out)))
+
+pri_cbx_out <- read.csv('CIBERSORTx/pri_output.csv', row.names = 1)
+pri_cbx_out_means <- as.data.frame(sort(colMeans(pri_cbx_out)))
+
+met_cbx_out <- read.csv('CIBERSORTx/met_output.csv', row.names = 1)
+met_cbx_out_means <- as.data.frame(sort(colMeans(met_cbx_out)))
+################################################################################
+
+
+
+######################## Set desired proportion ################################
+ref_desired_proportion <- c('Hepatocytes' = 0.80, 'Pre-B_cell_CD34-' = 0.065, 'Tissue_stem_cells' = 0.06, 
+                            'BM' = 0.04, 'Pro-B_cell_CD34+' = 0.02, 'Macrophage' =  0.015)
+pri_desired_proportion <- c('Epithelial_cells' = 0.70, 'Tissue_stem_cells' = 0.17, 'Smooth_muscle_cells' = 0.05,
+                            'Endothelial_cells' = 0.04, 'Chondrocytes' = 0.021, 'Macrophage' = 0.019)
+met_desired_proportion <- c('Epithelial_cells' = 0.40, 'Hepatocytes' = 0.35, 'Tissue_stem_cells' = 0.13,
+                            'Fibroblasts' = 0.105, 'Chondrocytes' = 0.015)
+################################################################################
+
+
+
+######################## Subset Seurat based on cell proportion ################
+load('Seurat_processed_annotated.RData')
+
+table(ref_seurat_obj@meta.data$SingleR_label)
+dim(ref_seurat_obj)
+ref_seurat_obj_subset <- subset_seurat(ref_seurat_obj, ref_desired_proportion)
+table(ref_seurat_obj_subset@meta.data$SingleR_label)
+
+table(pri_seurat_obj@meta.data$SingleR_label)
+dim(pri_seurat_obj)
+pri_seurat_obj_subset <- subset_seurat(pri_seurat_obj, pri_desired_proportion)
+table(pri_seurat_obj_subset@meta.data$SingleR_label)
+
+table(met_seurat_obj@meta.data$SingleR_label)
+dim(met_seurat_obj)
+met_seurat_obj_subset <- subset_seurat(met_seurat_obj, met_desired_proportion)
+table(met_seurat_obj_subset@meta.data$SingleR_label)
+
+DimPlot(ref_seurat_obj_subset, reduction = "umap", group.by = 'SingleR_label')
+DimPlot(pri_seurat_obj_subset, reduction = "umap", group.by = 'SingleR_label')
+DimPlot(met_seurat_obj_subset, reduction = "umap", group.by = 'SingleR_label')
+
+save(ref_seurat_obj_subset, pri_seurat_obj_subset, met_seurat_obj_subset, 
+     file = 'Seurat_processed_annotated_subset.RData')
+################################################################################
+
+
+
+######################## Label malignancy#######################################
+load('Seurat_processed_annotated_subset.RData')
+dim(met_seurat_obj_subset)
+table(met_seurat_obj_subset@meta.data$SingleR_label)
+
+library(SCINA)
+gene_signatures <- list(
+  Malignant = c("MYC", "TP53", "EGFR", "CCND1", "CDK4", "MDM2", "BCL2", "KRAS", "PTEN",
+                "BRCA1", "BRCA2", "ERBB2", "MET", "RB1", "ALK"),
+  Non_Malignant = c("CD3D", "PTPRC", "CD19", "CD79A", "ACTA2", "TAGLN", "MYH11",
+                    "EPCAM", "VIM", "CDH1", "FN1", "COL1A1", "COL3A1"))
+
+expression_matrix <- as.matrix(GetAssayData(met_seurat_obj_subset, assay = "RNA", slot = "data"))
+valid_genes <- rownames(expression_matrix)
+gene_signatures <- lapply(gene_signatures, function(genes) intersect(genes, valid_genes))
+scina_results <- SCINA(exp = expression_matrix, signatures = gene_signatures,
+                       max_iter = 100, convergence_n = 10)
+
+met_seurat_obj_subset@meta.data$malignancy_label <- scina_results$cell_labels
+table(met_seurat_obj_subset@meta.data$malignancy_label)
+DimPlot(met_seurat_obj_subset, group.by = c("malignancy_label", "SingleR_label"), reduction = "umap")
+save(ref_seurat_obj_subset, pri_seurat_obj_subset, met_seurat_obj_subset,
+     file = 'Seurat_processed_annotated_subset_malignancy_labelled.RData')
+################################################################################
+
+
+
+##### Trash code #####
+load('Seurat_processed_annotated_subset.RData')
+# For ref
+ncol(ref_seurat_obj_subset) # Check this to set cells_per_patients
+for (i in 1:3) {
+  set.seed(42 + i)
+  ref_pseudobulk <- create_pseudobulk(ref_seurat_obj_subset, num_patients = 110, cells_per_patient = 3000) # Function
+  colnames(ref_pseudobulk) <- paste0("R_Patient_", 1:110)
+  write.csv(ref_pseudobulk, paste0("pseudobulk/ref_pseudobulk_", i, ".csv"), row.names = TRUE)
+}
+
+# For pri
+ncol(pri_seurat_obj_subset) # Check this to set cells_per_patients
+for (i in 1:3) {
+  set.seed(42 + i)
+  pri_pseudobulk <- create_pseudobulk(pri_seurat_obj_subset, num_patients = 16, cells_per_patient = 8000) # Function
+  colnames(pri_pseudobulk) <- paste0("P_Patient_", 1:16)
+  write.csv(pri_pseudobulk, paste0("pseudobulk/pri_pseudobulk_", i, ".csv"), row.names = TRUE)
+}
+
+# For met
+ncol(met_seurat_obj_subset) # Check this to set cells_per_patients
+for (i in 1:3) {
+  set.seed(42 + i)
+  met_pseudobulk <- create_pseudobulk(met_seurat_obj_subset, num_patients = 17, cells_per_patient = 4500) # Function
+  colnames(met_pseudobulk) <- paste0("M_Patient_", 1:17)
+  write.csv(met_pseudobulk, paste0("pseudobulk/met_pseudobulk_", i, ".csv"), row.names = TRUE)
+}
+################################################################################
+
+################################################################################
+# END
+################################################################################
