@@ -1,0 +1,721 @@
+# In this section we are processing and analysing simulated pseudobulk data from DEBoost_validation_dataset section.
+# We also have code to obtain relavent plots at the bottom. 
+
+setwd('Desktop/Research/Chenlab/Liver Metastasis/updated_simulation/')
+library(Seurat)
+
+##### Get met_seurat with different proportion of malignant cells  #####
+load('Seurat_processed_annotated_subset_malignancy_labelled.RData')
+prop.table(table(met_seurat_obj_subset@meta.data$malignancy_label))
+
+malignant_cells <- WhichCells(met_seurat_obj_subset, expression = malignancy_label == "Malignant")
+non_malignant_cells <- WhichCells(met_seurat_obj_subset, expression = malignancy_label == "Non_Malignant")
+
+# Function to create Seurat subsets with specific malignant proportions
+create_seurat_with_proportion <- function(seurat_obj, malignant_cells, non_malignant_cells, malignant_prop) {
+  set.seed(123)
+  total_malignant <- length(malignant_cells)
+  total_non_malignant <- length(non_malignant_cells)
+  total_cells <- min(total_malignant / malignant_prop, total_non_malignant / (1 - malignant_prop))
+  n_malignant <- round(malignant_prop * total_cells)
+  n_non_malignant <- round((1 - malignant_prop) * total_cells)
+  
+  # Sample cells
+  sampled_malignant <- sample(malignant_cells, n_malignant, replace = n_malignant > total_malignant)
+  sampled_non_malignant <- sample(non_malignant_cells, n_non_malignant, replace = n_non_malignant > total_non_malignant)
+  sampled_cells <- c(sampled_malignant, sampled_non_malignant)
+  subset(seurat_obj, cells = sampled_cells)
+}
+
+# Create Seurat objects with specified proportions
+malignant_props <- c(0, 0.10, 0.25, 0.50, 0.75, 0.90, 1.0)
+met_prop_seurat_objects <- lapply(malignant_props, function(p) 
+  create_seurat_with_proportion(met_seurat_obj_subset, malignant_cells, non_malignant_cells, p)
+)
+
+names(met_prop_seurat_objects) <- paste0("met_seurat_", malignant_props * 100)
+lapply(met_prop_seurat_objects, function(obj) prop.table(table(obj@meta.data$malignancy_label)))
+
+met_0 <- met_prop_seurat_objects$met_seurat_0
+met_10 <- met_prop_seurat_objects$met_seurat_10
+met_25 <- met_prop_seurat_objects$met_seurat_25
+met_50 <- met_prop_seurat_objects$met_seurat_50
+met_75 <- met_prop_seurat_objects$met_seurat_75
+met_90 <- met_prop_seurat_objects$met_seurat_90
+met_100 <- met_prop_seurat_objects$met_seurat_100
+save(met_0, met_10, met_25, met_50, met_75, met_90, met_100, file = 'Seurat_processed_annotated_subset_variable_proportion_met.RData')
+#####
+
+##### Change seurat object names for easier replication of code #####
+load('Seurat_processed_annotated_subset.RData')
+load('Seurat_processed_annotated_subset_variable_proportion_met.RData')
+
+# 0
+met_seurat_obj_subset <- met_0
+save(ref_seurat_obj_subset, pri_seurat_obj_subset, met_seurat_obj_subset, file = 'prop_malignancy/Sim_0.RData')
+
+# 10
+met_seurat_obj_subset <- met_10
+save(ref_seurat_obj_subset, pri_seurat_obj_subset, met_seurat_obj_subset, file = 'prop_malignancy/Sim_10.RData')
+
+# 25
+met_seurat_obj_subset <- met_25
+save(ref_seurat_obj_subset, pri_seurat_obj_subset, met_seurat_obj_subset, file = 'prop_malignancy/Sim_25.RData')
+
+# 50
+met_seurat_obj_subset <- met_50
+save(ref_seurat_obj_subset, pri_seurat_obj_subset, met_seurat_obj_subset, file = 'prop_malignancy/Sim_50.RData')
+
+# 75
+met_seurat_obj_subset <- met_75
+save(ref_seurat_obj_subset, pri_seurat_obj_subset, met_seurat_obj_subset, file = 'prop_malignancy/Sim_75.RData')
+
+# 90
+met_seurat_obj_subset <- met_90
+save(ref_seurat_obj_subset, pri_seurat_obj_subset, met_seurat_obj_subset, file = 'prop_malignancy/Sim_90.RData')
+
+# 100
+met_seurat_obj_subset <- met_100
+save(ref_seurat_obj_subset, pri_seurat_obj_subset, met_seurat_obj_subset, file = 'prop_malignancy/Sim_100.RData')
+#####
+
+# Example code to get simulated pseudobulk with 10% malignant cells
+# Can do with others proportion of malignant cells too
+##### For 10% #####
+##### Subset seurat and generate pseudobulk #####
+load('prop_test/Sim_10.RData')
+# Function to generate pseudobulk from Seurat object
+generate_pseudobulk_random <- function(seurat_obj, num_samples, num_cells_per_sample) {
+  # Create an empty list to hold pseudobulk data
+  pseudobulk_list <- list()
+  
+  for (i in 1:num_samples) {
+    # Randomly sample cells from the Seurat object
+    sampled_cells <- sample(colnames(seurat_obj), size = num_cells_per_sample, replace = TRUE)
+    
+    # Extract raw counts for the selected cells and sum to create pseudobulk
+    pseudobulk_data <- GetAssayData(seurat_obj, slot = "counts")[, sampled_cells]
+    pseudobulk_counts <- rowSums(pseudobulk_data)
+    
+    # Add pseudobulk counts to the list
+    pseudobulk_list[[paste0("Sample_", i)]] <- pseudobulk_counts
+  }
+  
+  # Combine pseudobulk counts into a matrix
+  pseudobulk_matrix <- do.call(cbind, pseudobulk_list)
+  return(pseudobulk_matrix)
+}
+
+# Define number of samples and cells per pseudobulk sample
+# The number of cells per sample can be adjusted to match the sequencing depth of the bulk RNA-seq data
+num_cells_per_sample_ref <- 1000
+num_cells_per_sample_pri <- 1000
+num_cells_per_sample_met <- 1000
+
+# Number of samples in bulk data
+num_ref_samples <- 110
+num_pri_samples <- 16
+num_met_samples <- 17
+
+pseudobulk_ref <- generate_pseudobulk_random(ref_seurat_obj_subset, num_ref_samples, num_cells_per_sample_ref)
+pseudobulk_pri <- generate_pseudobulk_random(pri_seurat_obj_subset, num_pri_samples, num_cells_per_sample_pri)
+pseudobulk_met <- generate_pseudobulk_random(met_seurat_obj_subset, num_met_samples, num_cells_per_sample_met)
+
+gene_length <- read.csv('../gencode.v23.annotation.csv')
+gene_length <- gene_length[,c('gene', 'gene_length', 'ensembl')]
+rownames(gene_length) <- make.unique(gene_length$gene)
+head(gene_length)
+gene_lengths_named <- setNames(gene_length$gene_length, gene_length$gene)
+
+# Filter out the gene lengths that are relevant to the genes present in pseudobulk
+ref_common_genes <- intersect(rownames(pseudobulk_ref), names(gene_lengths_named))
+ref_matched_gene_lengths <- gene_lengths_named[ref_common_genes]
+
+pri_common_genes <- intersect(rownames(pseudobulk_pri), names(gene_lengths_named))
+pri_matched_gene_lengths <- gene_lengths_named[pri_common_genes]
+
+met_common_genes <- intersect(rownames(pseudobulk_met), names(gene_lengths_named))
+met_matched_gene_lengths <- gene_lengths_named[met_common_genes]
+
+# Subset pseudobulk matrices to ensure they only contain genes present in gene lengths
+pseudobulk_ref <- pseudobulk_ref[ref_common_genes, ]
+pseudobulk_pri <- pseudobulk_pri[pri_common_genes, ]
+pseudobulk_met <- pseudobulk_met[met_common_genes, ]
+
+# Function to convert counts to TPM
+counts_to_tpm <- function(counts, gene_lengths) {
+  # Calculate RPK (Reads Per Kilobase)
+  gene_lengths_matched <- gene_lengths[rownames(counts)]
+  rpk <- counts / (gene_lengths_matched / 1000)  # Divide by gene length in kb to get RPK
+  
+  # Calculate scaling factor for TPM
+  scaling_factor <- colSums(rpk) / 1e6
+  tpm <- sweep(rpk, 2, scaling_factor, FUN = "/")
+  
+  return(tpm)
+}
+
+pseudobulk_ref_tpm <- counts_to_tpm(pseudobulk_ref, ref_matched_gene_lengths)
+pseudobulk_pri_tpm <- counts_to_tpm(pseudobulk_pri, pri_matched_gene_lengths)
+pseudobulk_met_tpm <- counts_to_tpm(pseudobulk_met, met_matched_gene_lengths)
+save(pseudobulk_ref, pseudobulk_pri, pseudobulk_met,
+     pseudobulk_ref_tpm, pseudobulk_pri_tpm, pseudobulk_met_tpm,
+     file = 'prop_test/CRC_pseudobulk_untransformed_met_10%.RData')
+
+# Transform TPM to log2(TPM + 1)
+log2_pseudobulk_ref_tpm <- log2(pseudobulk_ref_tpm + 1)
+log2_pseudobulk_pri_tpm <- log2(pseudobulk_pri_tpm + 1)
+log2_pseudobulk_met_tpm <- log2(pseudobulk_met_tpm + 1)
+
+# Transform pseudobulk counts to log2(count + 1)
+log2_pseudobulk_ref_counts <- log2(pseudobulk_ref + 1)
+log2_pseudobulk_pri_counts <- log2(pseudobulk_pri + 1)
+log2_pseudobulk_met_counts <- log2(pseudobulk_met + 1)
+
+save(log2_pseudobulk_ref_tpm, log2_pseudobulk_pri_tpm, log2_pseudobulk_met_tpm,
+     log2_pseudobulk_ref_counts, log2_pseudobulk_pri_counts, log2_pseudobulk_met_counts,
+     file = 'prop_test/CRC_pseudobulk_processed_met_10%.RData')
+#####
+##### Correlation plots #####
+load('prop_test/CRC_pseudobulk_processed_met_10%.RData')
+load('CRC_bulk_data_with_gene_symbol.RData')
+
+ref_common_genes <- intersect(rownames(log2_pseudobulk_ref_counts), rownames(ref_log2_raw_count_matrix_gene))
+ref_log2_raw_count_matrix_gene <- ref_log2_raw_count_matrix_gene[ref_common_genes, ]
+ref_log2_tpm_matrix_gene <- ref_log2_tpm_matrix_gene[ref_common_genes, ]
+log2_pseudobulk_ref_counts <- log2_pseudobulk_ref_counts[ref_common_genes, ] 
+log2_pseudobulk_ref_tpm <- log2_pseudobulk_ref_tpm[ref_common_genes, ]
+
+pri_common_genes <- intersect(rownames(log2_pseudobulk_pri_counts), rownames(pri_log2_raw_count_matrix_gene))
+pri_log2_raw_count_matrix_gene <- pri_log2_raw_count_matrix_gene[pri_common_genes, ]
+pri_log2_tpm_matrix_gene <- pri_log2_tpm_matrix_gene[pri_common_genes, ]
+log2_pseudobulk_pri_counts <- log2_pseudobulk_pri_tpm[pri_common_genes, ]
+log2_pseudobulk_pri_tpm <- log2_pseudobulk_pri_tpm[pri_common_genes, ]
+
+met_common_genes <- intersect(rownames(log2_pseudobulk_met_counts), rownames(met_log2_raw_count_matrix_gene))
+met_log2_raw_count_matrix_gene <- met_log2_raw_count_matrix_gene[met_common_genes, ]
+met_log2_tpm_matrix_gene <- met_log2_tpm_matrix_gene[met_common_genes, ]
+log2_pseudobulk_met_counts <- log2_pseudobulk_met_counts[met_common_genes, ]
+log2_pseudobulk_met_tpm <- log2_pseudobulk_met_tpm[met_common_genes, ]
+
+ref_corr <- cor(ref_log2_raw_count_matrix_gene, log2_pseudobulk_ref_counts, method = 'spearman')
+range(ref_corr)
+#pdf("figures/heatmap_ref_corr.pdf", width = 12, height = 10)
+#png("figures/heatmap_ref_corr.png", width = 1200, height = 1000)
+heatmap(ref_corr, main = "Correlation Heatmap - Reference Dataset")
+#dev.off()
+
+pri_corr <- cor(pri_log2_raw_count_matrix_gene, log2_pseudobulk_pri_counts, method = 'spearman')
+range(pri_corr)
+#pdf("figures/heatmap_pri_corr.pdf", width = 12, height = 10)
+#png("figures/heatmap_pri_corr.png", width = 1200, height = 1000)
+heatmap(pri_corr, main = "Correlation Heatmap - Primary Dataset")
+#dev.off()
+
+met_corr <- cor(met_log2_raw_count_matrix_gene, log2_pseudobulk_met_counts, method = 'spearman')
+range(met_corr)
+#pdf("figures/heatmap_met_corr.pdf", width = 12, height = 10)
+#png("figures/heatmap_met_corr.png", width = 1200, height = 1000)
+heatmap(met_corr, main = "Correlation Heatmap - Metastatic Dataset")
+#dev.off()
+#####
+##### Function to observe variance #####
+generate_variance_plots <- function(pseudobulk_counts, bulk_counts, pseudobulk_tpm, bulk_tpm, dataset_name) {
+  # Calculate variance for each gene across all samples in pseudobulk dataset (log-transformed read counts)
+  gene_variance_pseudobulk_counts <- apply(pseudobulk_counts, 1, var, na.rm = TRUE)
+  # Calculate variance for each gene across all samples in actual bulk dataset (log-transformed read counts)
+  gene_variance_bulk_counts <- apply(bulk_counts, 1, var, na.rm = TRUE)
+  
+  # Calculate variance for each gene across all samples in pseudobulk dataset (log-transformed TPM)
+  gene_variance_pseudobulk_tpm <- apply(pseudobulk_tpm, 1, var, na.rm = TRUE)
+  # Calculate variance for each gene across all samples in actual bulk dataset (log-transformed TPM)
+  gene_variance_bulk_tpm <- apply(bulk_tpm, 1, var, na.rm = TRUE)
+  
+  # Find common genes between pseudobulk and actual bulk for fair comparison and subset the variance data to only include the common genes
+  common_genes <- intersect(rownames(pseudobulk_counts), rownames(bulk_counts))
+  gene_variance_pseudobulk_counts <- gene_variance_pseudobulk_counts[common_genes]
+  gene_variance_bulk_counts <- gene_variance_bulk_counts[common_genes]
+  gene_variance_pseudobulk_tpm <- gene_variance_pseudobulk_tpm[common_genes]
+  gene_variance_bulk_tpm <- gene_variance_bulk_tpm[common_genes]
+  
+  # Scatter Plot to compare gene-wise variance between pseudobulk and actual bulk (log-transformed read counts)
+  
+  # Plots for before   
+  #  pdf("figures/var_ref_rc_before.pdf", width = 12, height = 10)
+  #  pdf("figures/var_pri_rc_before.pdf", width = 12, height = 10)
+  #  pdf("figures/var_met_rc_before.pdf", width = 12, height = 10)
+  
+  # Plots for after
+  #  pdf("figures/var_ref_rc_after.pdf", width = 12, height = 10)
+  #  pdf("figures/var_pri_rc_after.pdf", width = 12, height = 10)
+  #  pdf("figures/var_met_rc_after.pdf", width = 12, height = 10)
+  
+  plot(gene_variance_pseudobulk_counts, gene_variance_bulk_counts,
+       main = paste("Gene-wise Variance (Log Read Counts): Pseudobulk vs Actual Bulk -", dataset_name),
+       xlab = "Pseudobulk Variance (Log Read Counts)",
+       ylab = "Actual Bulk Variance (Log Read Counts)",
+       pch = 16, col = "blue",
+       cex = 0.5)
+  # Add reference line to indicate ideal correlation
+  abline(0, 1, col = "red", lty = 2)
+  #  dev.off()
+  
+  # Scatter Plot for TPM variances (log-transformed TPM values)
+  #  pdf("figures/var_ref_tpm_before.pdf", width = 12, height = 10)
+  #  pdf("figures/var_pri_tpm_before.pdf", width = 12, height = 10)
+  #  pdf("figures/var_met_tpm_before.pdf", width = 12, height = 10)
+  
+  # Plots for after
+  #  pdf("figures/var_ref_tpm_after.pdf", width = 12, height = 10)
+  #  pdf("figures/var_pri_tpm_after.pdf", width = 12, height = 10)
+  #  pdf("figures/var_met_tpm_after.pdf", width = 12, height = 10)
+  
+  plot(gene_variance_pseudobulk_tpm, gene_variance_bulk_tpm,
+       main = paste("Gene-wise Variance (Log TPM): Pseudobulk vs Actual Bulk -", dataset_name),
+       xlab = "Pseudobulk Variance (Log TPM)",
+       ylab = "Actual Bulk Variance (Log TPM)",
+       pch = 16, col = "green",
+       cex = 0.5)
+  # Add reference line to indicate ideal correlation
+  abline(0, 1, col = "red", lty = 2)
+  #  dev.off()
+  
+  # Boxplot for variance (log-transformed read counts)
+  # Plots for before
+  #  pdf("figures/boxplot_ref_rc_before.pdf", width = 12, height = 10)
+  #  pdf("figures/boxplot_pri_rc_before.pdf", width = 12, height = 10)
+  #  pdf("figures/boxplot_met_rc_before.pdf", width = 12, height = 10)
+  
+  # Plots for after
+  #  pdf("figures/boxplot_ref_rc_after.pdf", width = 12, height = 10)
+  #  pdf("figures/boxplot_pri_rc_after.pdf", width = 12, height = 10)
+  #  pdf("figures/boxplot_met_rc_after.pdf", width = 12, height = 10)
+  
+  boxplot(gene_variance_pseudobulk_counts, gene_variance_bulk_counts,
+          names = c("Pseudobulk (Read Counts)", "Actual Bulk (Read Counts)"),
+          main = paste("Boxplot of Gene Variance (Log Read Counts): Pseudobulk vs Actual Bulk -", dataset_name),
+          ylab = "Gene Variance",
+          col = c("lightblue", "lightcoral"))
+  #  dev.off()
+  
+  # Boxplot for variance (log-transformed TPM)
+  # Plots for before
+  #  pdf("figures/boxplot_ref_tpm_before.pdf", width = 12, height = 10)
+  #  pdf("figures/boxplot_pri_tpm_before.pdf", width = 12, height = 10)
+  #  pdf("figures/boxplot_met_tpm_before.pdf", width = 12, height = 10)
+  
+  # Plots for after
+  #  pdf("figures/boxplot_ref_tpm_after.pdf", width = 12, height = 10)
+  #  pdf("figures/boxplot_pri_tpm_after.pdf", width = 12, height = 10)
+  #  pdf("figures/boxplot_met_tpm_after.pdf", width = 12, height = 10)
+  
+  boxplot(gene_variance_pseudobulk_tpm, gene_variance_bulk_tpm,
+          names = c("Pseudobulk (TPM)", "Actual Bulk (TPM)"),
+          main = paste("Boxplot of Gene Variance (Log TPM): Pseudobulk vs Actual Bulk -", dataset_name),
+          ylab = "Gene Variance",
+          col = c("lightgreen", "lightcoral"))
+  #  dev.off()
+}
+#####
+##### Observe variance - Before #####
+load('prop_test/CRC_pseudobulk_processed_met_10%.RData')
+load('CRC_bulk_data_with_gene_symbol.RData')
+# Reference Dataset
+generate_variance_plots(log2_pseudobulk_ref_counts, ref_log2_raw_count_matrix_gene, 
+                        log2_pseudobulk_ref_tpm, ref_log2_tpm_matrix_gene, 
+                        "Reference - Before")
+
+# Primary Dataset
+generate_variance_plots(log2_pseudobulk_pri_counts, pri_log2_raw_count_matrix_gene, 
+                        log2_pseudobulk_pri_tpm, pri_log2_tpm_matrix_gene, 
+                        "Primary - Before")
+
+# Metastatic Dataset
+generate_variance_plots(log2_pseudobulk_met_counts, met_log2_raw_count_matrix_gene, 
+                        log2_pseudobulk_met_tpm, met_log2_tpm_matrix_gene, 
+                        "Metastatic - Before")
+#####
+##### Remove variance #####
+# Load necessary library
+library(sva)
+
+# Function to calculate TPM from raw counts
+calc_tpm <- function(counts, gene_length) {
+  rpk <- counts / gene_length  # Reads per kilobase
+  tpm <- t(t(rpk) / colSums(rpk) * 1e6)  # Normalize to 1e6 total RPK
+  return(tpm)
+}
+
+# Function to adjust matrices to ensure non-negativity
+adjust_non_negative <- function(matrix) {
+  # Shift values so that the minimum value is 1
+  min_value <- min(matrix, na.rm = TRUE)
+  if (min_value < 0) {
+    matrix <- matrix + abs(min_value) + 1
+  }
+  return(matrix)
+}
+
+# Function to prepare DEBoost-compatible matrices for all datasets and save as a single RData file
+prepare_and_save_deboost_data <- function(bulk_counts_list, pseudobulk_counts_list, gene_length_vector, output_filename) {
+  # Initialize empty lists to store processed data
+  tpm_bulk_list <- list()
+  combat_bulk_list <- list()
+  tpm_pseudobulk_list <- list()
+  combat_pseudobulk_list <- list()
+  
+  # Iterate over each dataset (reference, primary, metastatic)
+  for (dataset_name in names(bulk_counts_list)) {
+    # Get bulk and pseudobulk counts for the current dataset
+    bulk_counts <- bulk_counts_list[[dataset_name]]
+    pseudobulk_counts <- pseudobulk_counts_list[[dataset_name]]
+    
+    # Step 1: Set up batch vector
+    batch <- c(rep(1, ncol(bulk_counts)), rep(2, ncol(pseudobulk_counts)))
+    
+    # Step 2: Combine bulk and pseudobulk matrices
+    combined_matrix <- cbind(bulk_counts, pseudobulk_counts)
+    
+    # Step 3: Apply ComBat adjustment
+    combat_matrix <- ComBat(dat = as.matrix(combined_matrix), batch = batch, par.prior = TRUE, prior.plots = FALSE)
+    
+    # Step 4: Adjust ComBat results to ensure non-negativity
+    combat_matrix <- adjust_non_negative(combat_matrix)
+    
+    # Step 5: Split back into adjusted bulk and pseudobulk matrices
+    combat_bulk <- combat_matrix[, 1:ncol(bulk_counts)]
+    combat_pseudobulk <- combat_matrix[, (ncol(bulk_counts) + 1):ncol(combat_matrix)]
+    
+    # Step 6: Calculate TPM for both bulk and pseudobulk
+    tpm_bulk <- calc_tpm(combat_bulk, gene_length_vector)
+    tpm_pseudobulk <- calc_tpm(combat_pseudobulk, gene_length_vector)
+    
+    # Step 7: Adjust TPM to ensure non-negativity
+    tpm_bulk <- adjust_non_negative(tpm_bulk)
+    tpm_pseudobulk <- adjust_non_negative(tpm_pseudobulk)
+    
+    # Step 8: Store results in the corresponding list
+    tpm_bulk_list[[dataset_name]] <- tpm_bulk
+    combat_bulk_list[[dataset_name]] <- combat_bulk
+    tpm_pseudobulk_list[[dataset_name]] <- tpm_pseudobulk
+    combat_pseudobulk_list[[dataset_name]] <- combat_pseudobulk
+  }
+  
+  # Step 9: Save all matrices into a single RData file
+  save(tpm_bulk_list, combat_bulk_list, tpm_pseudobulk_list, combat_pseudobulk_list, file = output_filename)
+  
+  # Step 10: Return a message confirming completion
+  cat("Finished preparing and saving DEBoost-compatible matrices for all datasets into", output_filename, "\n")
+}
+
+# Example Usage for Reference, Primary, and Metastatic Datasets
+load('CRC_bulk_data_with_gene_symbol.RData')
+load('prop_test/CRC_pseudobulk_processed_met_10%.RData')
+#library(preprocessCore)
+ref_common_genes <- intersect(rownames(log2_pseudobulk_ref_counts), rownames(ref_log2_raw_count_matrix_gene))
+ref_log2_raw_count_matrix_gene <- ref_log2_raw_count_matrix_gene[ref_common_genes, ]
+ref_log2_tpm_matrix_gene <- ref_log2_tpm_matrix_gene[ref_common_genes, ]
+log2_pseudobulk_ref_counts <- log2_pseudobulk_ref_counts[ref_common_genes, ] 
+log2_pseudobulk_ref_tpm <- log2_pseudobulk_ref_tpm[ref_common_genes, ]
+
+pri_common_genes <- intersect(rownames(log2_pseudobulk_pri_counts), rownames(pri_log2_raw_count_matrix_gene))
+pri_log2_raw_count_matrix_gene <- pri_log2_raw_count_matrix_gene[pri_common_genes, ]
+pri_log2_tpm_matrix_gene <- pri_log2_tpm_matrix_gene[pri_common_genes, ]
+log2_pseudobulk_pri_counts <- log2_pseudobulk_pri_tpm[pri_common_genes, ]
+log2_pseudobulk_pri_tpm <- log2_pseudobulk_pri_tpm[pri_common_genes, ]
+
+met_common_genes <- intersect(rownames(log2_pseudobulk_met_counts), rownames(met_log2_raw_count_matrix_gene))
+met_log2_raw_count_matrix_gene <- met_log2_raw_count_matrix_gene[met_common_genes, ]
+met_log2_tpm_matrix_gene <- met_log2_tpm_matrix_gene[met_common_genes, ]
+log2_pseudobulk_met_counts <- log2_pseudobulk_met_counts[met_common_genes, ]
+log2_pseudobulk_met_tpm <- log2_pseudobulk_met_tpm[met_common_genes, ]
+
+
+# Create named lists for bulk and pseudobulk counts
+bulk_counts_list <- list(ref = ref_log2_raw_count_matrix_gene,
+                         pri = pri_log2_raw_count_matrix_gene,
+                         met = met_log2_raw_count_matrix_gene)
+
+pseudobulk_counts_list <- list(ref = log2_pseudobulk_ref_counts,
+                               pri = log2_pseudobulk_pri_counts,
+                               met = log2_pseudobulk_met_counts)
+
+# Gene length vector (Assume this is already loaded as `gene_length$gene_length`)
+gene_length <- read.csv('../gencode.v23.annotation.csv')
+gene_length <- gene_length[,c('gene', 'gene_length', 'ensembl')]
+rownames(gene_length) <- make.unique(gene_length$gene)
+gene_length_vector <- gene_length$gene_length
+
+# Prepare data and save to a single RData file
+prepare_and_save_deboost_data(bulk_counts_list = bulk_counts_list,
+                              pseudobulk_counts_list = pseudobulk_counts_list,
+                              gene_length_vector = gene_length_vector,
+                              output_filename = "prop_test/deboost_compatible_data_10%.RData")
+#####
+##### Observe variance - After #####
+load('prop_test/deboost_compatible_data_10%.RData')
+
+# For reference
+generate_variance_plots(combat_pseudobulk_list$ref, combat_bulk_list$ref, 
+                        tpm_pseudobulk_list$ref, tpm_bulk_list$ref, 
+                        "Reference - After")
+
+# Primary Dataset
+generate_variance_plots(combat_pseudobulk_list$pri, combat_bulk_list$pri, 
+                        tpm_pseudobulk_list$pri, tpm_bulk_list$pri, 
+                        "Primary - After")
+
+# Metastatic Dataset
+generate_variance_plots(combat_pseudobulk_list$met, combat_bulk_list$met, 
+                        tpm_pseudobulk_list$met, tpm_bulk_list$met, 
+                        "Metastatic - After")
+#####
+##### Running DEBoost #####
+load('Colon_cell_lines.RData')
+load('prop_test/deboost_compatible_data_10%.RData')
+source('original_DEBoost.R')
+simulated_DEBoost_result_met_10 <- perform.DE.analysis.between.primary.and.metastatic.cancer(
+  PRI.log2.tpm.matrix = tpm_pseudobulk_list$pri, PRI.log2.read.count.matrix = combat_pseudobulk_list$pri,
+  MET.log2.tpm.matrix = tpm_pseudobulk_list$met, MET.log2.read.count.matrix = combat_pseudobulk_list$met,
+  REF.log2.tpm.matrix = tpm_pseudobulk_list$ref, REF.log2.read.count.matrix = combat_pseudobulk_list$ref,
+  TCGA.best.cell.line = TCGA.best.cell.line, MET500.best.cell.line = MET500.best.cell.line)
+save(simulated_DEBoost_result_met_10, file = 'prop_test/DEBoost_result_met_10%.RData')
+#####
+#####
+
+##### Observe the overlap #####
+load('prop_malignancy/DEBoost_result_met_0%.RData')
+load('prop_malignancy/DEBoost_result_met_10%.RData')
+load('prop_malignancy/DEBoost_result_met_25%.RData')
+load('prop_malignancy/DEBoost_result_met_50%.RData')
+load('prop_malignancy/DEBoost_result_met_75%.RData')
+load('prop_malignancy/DEBoost_result_met_90%.RData')
+load('prop_malignancy/DEBoost_result_met_100%.RData')
+
+de_genes_100 <- c(simulated_DEBoost_result_met_100$tumor.intrinsic.DE.gene.rs$up.gene,
+                  simulated_DEBoost_result_met_100$tumor.intrinsic.DE.gene.rs$up.outlier.gene,
+                  simulated_DEBoost_result_met_100$tumor.intrinsic.DE.gene.rs$dn.gene,
+                  simulated_DEBoost_result_met_100$tumor.intrinsic.DE.gene.rs$dn.outlier.gene)
+
+de_genes_90 <- c(simulated_DEBoost_result_met_90$tumor.intrinsic.DE.gene.rs$up.gene,
+                 simulated_DEBoost_result_met_90$tumor.intrinsic.DE.gene.rs$up.outlier.gene,
+                 simulated_DEBoost_result_met_90$tumor.intrinsic.DE.gene.rs$dn.gene,
+                 simulated_DEBoost_result_met_90$tumor.intrinsic.DE.gene.rs$dn.outlier.gene)
+
+de_genes_75 <- c(simulated_DEBoost_result_met_75$tumor.intrinsic.DE.gene.rs$up.gene,
+                 simulated_DEBoost_result_met_75$tumor.intrinsic.DE.gene.rs$up.outlier.gene,
+                 simulated_DEBoost_result_met_75$tumor.intrinsic.DE.gene.rs$dn.gene,
+                 simulated_DEBoost_result_met_75$tumor.intrinsic.DE.gene.rs$dn.outlier.gene)
+
+de_genes_50 <- c(simulated_DEBoost_result_met_50$tumor.intrinsic.DE.gene.rs$up.gene,
+                 simulated_DEBoost_result_met_50$tumor.intrinsic.DE.gene.rs$up.outlier.gene,
+                 simulated_DEBoost_result_met_50$tumor.intrinsic.DE.gene.rs$dn.gene,
+                 simulated_DEBoost_result_met_50$tumor.intrinsic.DE.gene.rs$dn.outlier.gene)
+
+de_genes_25 <- c(simulated_DEBoost_result_met_25$tumor.intrinsic.DE.gene.rs$up.gene,
+                 simulated_DEBoost_result_met_25$tumor.intrinsic.DE.gene.rs$up.outlier.gene,
+                 simulated_DEBoost_result_met_25$tumor.intrinsic.DE.gene.rs$dn.gene,
+                 simulated_DEBoost_result_met_25$tumor.intrinsic.DE.gene.rs$dn.outlier.gene)
+
+de_genes_10 <- c(simulated_DEBoost_result_met_10$tumor.intrinsic.DE.gene.rs$up.gene,
+                 simulated_DEBoost_result_met_10$tumor.intrinsic.DE.gene.rs$up.outlier.gene,
+                 simulated_DEBoost_result_met_10$tumor.intrinsic.DE.gene.rs$dn.gene,
+                 simulated_DEBoost_result_met_10$tumor.intrinsic.DE.gene.rs$dn.outlier.gene)
+
+de_genes_0 <- c(simulated_DEBoost_result_met_0$tumor.intrinsic.DE.gene.rs$up.gene,
+                simulated_DEBoost_result_met_0$tumor.intrinsic.DE.gene.rs$up.outlier.gene,
+                simulated_DEBoost_result_met_0$tumor.intrinsic.DE.gene.rs$dn.gene,
+                simulated_DEBoost_result_met_0$tumor.intrinsic.DE.gene.rs$dn.outlier.gene)
+
+
+jaccard_index <- function(set1, set2) {
+  intersect_count <- length(intersect(set1, set2))
+  union_count <- length(union(set1, set2))
+  return(intersect_count / union_count)
+}
+
+overlap_percentage <- function(set1, set2) {
+  intersect_count <- length(intersect(set1, set2))
+  return((intersect_count / length(set1)) * 100)
+}
+
+hypergeometric_p_value <- function(total_genes, set1, set2) {
+  k <- length(set1)
+  n <- length(set2)
+  x <- length(intersect(set1, set2))
+  return(phyper(x - 1, k, total_genes - k, n, lower.tail = FALSE))
+}
+
+gene_sets <- list(
+  `100%` = de_genes_100,
+  `90%` = de_genes_90,
+  `75%` = de_genes_75,
+  `50%` = de_genes_50,
+  `25%` = de_genes_25,
+  `10%` = de_genes_10,
+  `0%` = de_genes_0
+)
+
+# Total genes in background
+total_genes <- 500 # We can adjust this to your specific total gene count
+
+# Analysing each set
+results <- lapply(names(gene_sets)[-1], function(name) {
+  set <- gene_sets[[name]]
+  list(
+    Set = name,
+    Jaccard_Index = jaccard_index(de_genes_100, set),
+    Overlap_Percentage = overlap_percentage(de_genes_100, set),
+    Hypergeometric_p_value = hypergeometric_p_value(total_genes, de_genes_100, set),
+    Missing_Genes = setdiff(de_genes_100, set),
+    Extra_Genes = setdiff(set, de_genes_100)
+  )
+})
+
+results_df <- do.call(rbind, lapply(results, function(x) {
+  data.frame(
+    Set = x$Set,
+    Jaccard_Index = x$Jaccard_Index,
+    Overlap_Percentage = x$Overlap_Percentage,
+    Hypergeometric_p_value = x$Hypergeometric_p_value
+  )
+}))
+
+print(results_df)
+#####
+
+
+
+##### Plots I/II #####
+load('prop_malignancy/DEBoost_result_met_10%.RData')
+load('prop_malignancy/DEBoost_result_met_25%.RData')
+load('prop_malignancy/DEBoost_result_met_50%.RData')
+load('prop_malignancy/DEBoost_result_met_75%.RData')
+load('prop_malignancy/DEBoost_result_met_90%.RData')
+
+library(VennDiagram)
+library(UpSetR)
+up_gene_data <- list("up gene - 10% malignant" = c(simulated_DEBoost_result_met_10$tumor.intrinsic.DE.gene.rs$up.gene,
+                                                   simulated_DEBoost_result_met_10$tumor.intrinsic.DE.gene.rs$up.outlier.gene),
+                     "up gene - 25% malignant" = c(simulated_DEBoost_result_met_25$tumor.intrinsic.DE.gene.rs$up.gene,
+                                                   simulated_DEBoost_result_met_25$tumor.intrinsic.DE.gene.rs$up.outlier.gene),
+                     "up gene - 50% malignant" = c(simulated_DEBoost_result_met_50$tumor.intrinsic.DE.gene.rs$up.gene,
+                                                   simulated_DEBoost_result_met_50$tumor.intrinsic.DE.gene.rs$up.outlier.gene),
+                     "up gene - 75% malignant" = c(simulated_DEBoost_result_met_75$tumor.intrinsic.DE.gene.rs$up.gene,
+                                                   simulated_DEBoost_result_met_75$tumor.intrinsic.DE.gene.rs$up.outlier.gene),
+                     "up gene - 90% malignant" = c(simulated_DEBoost_result_met_90$tumor.intrinsic.DE.gene.rs$up.gene,
+                                                   simulated_DEBoost_result_met_90$tumor.intrinsic.DE.gene.rs$up.outlier.gene))
+up_venn.plot <- venn.diagram(x = up_gene_data, filename = NULL,
+                          fill = c("red", "blue", "green", "grey", "purple"),
+                          cat.col = c("red", "blue", "green", "grey", "purple"),
+                          alpha = 0.6, cat.cex = 0.8, margin = 0.2)
+#pdf("prop_malignancy/up_gene_venn.pdf", width = 8, height = 6)
+png("prop_malignancy/up_gene_venn.png", width = 800, height = 600, res = 150)
+grid.draw(up_venn.plot)
+dev.off()
+
+#pdf("prop_malignancy/up_gene_upset_plot.pdf", width = 8, height = 6)
+png("prop_malignancy/up_gene_upset_plot.png", width = 800, height = 600, res = 150)
+upset(fromList(up_gene_data), sets = c("up gene - 10% malignant", "up gene - 25% malignant", "up gene - 50% malignant", 
+                                    "up gene - 75% malignant", "up gene - 90% malignant"), order.by = "freq")
+dev.off()
+
+
+dn_gene_data <- list("dn gene - 10% malignant" = c(simulated_DEBoost_result_met_10$tumor.intrinsic.DE.gene.rs$dn.gene,
+                                                   simulated_DEBoost_result_met_10$tumor.intrinsic.DE.gene.rs$dn.outlier.gene),
+                     "dn gene - 25% malignant" = c(simulated_DEBoost_result_met_25$tumor.intrinsic.DE.gene.rs$dn.gene,
+                                                   simulated_DEBoost_result_met_25$tumor.intrinsic.DE.gene.rs$dn.outlier.gene),
+                     "dn gene - 50% malignant" = c(simulated_DEBoost_result_met_50$tumor.intrinsic.DE.gene.rs$dn.gene,
+                                                   simulated_DEBoost_result_met_50$tumor.intrinsic.DE.gene.rs$dn.outlier.gene),
+                     "dn gene - 75% malignant" = c(simulated_DEBoost_result_met_75$tumor.intrinsic.DE.gene.rs$dn.gene,
+                                                   simulated_DEBoost_result_met_75$tumor.intrinsic.DE.gene.rs$dn.outlier.gene),
+                     "dn gene - 90% malignant" = c(simulated_DEBoost_result_met_90$tumor.intrinsic.DE.gene.rs$dn.gene, 
+                                                   simulated_DEBoost_result_met_90$tumor.intrinsic.DE.gene.rs$dn.outlier.gene))
+dn_venn.plot <- venn.diagram(x = dn_gene_data, filename = NULL,
+                             fill = c("red", "blue", "green", "grey", "purple"),
+                             cat.col = c("red", "blue", "green", "grey", "purple"),
+                             alpha = 0.6, cat.cex = 0.8, margin = 0.2)
+#pdf("prop_malignancy/dn_gene_venn.pdf", width = 8, height = 6)
+png("prop_malignancy/dn_gene_venn.png", width = 800, height = 600, res = 150)
+grid.draw(dn_venn.plot)
+dev.off()
+
+#pdf("prop_malignancy/dn_gene_upset_plot.pdf", width = 8, height = 6)
+png("prop_malignancy/dn_gene_upset_plot.png", width = 800, height = 600, res = 150)
+upset(fromList(dn_gene_data), sets = c("dn gene - 10% malignant", "dn gene - 25% malignant", "dn gene - 50% malignant", 
+                                       "dn gene - 75% malignant", "dn gene - 90% malignant"), order.by = "freq")
+dev.off()
+
+
+ref_gene_data <- list("ref gene - 10% malignant" = simulated_DEBoost_result_met_10$tumor.intrinsic.DE.gene.rs$ref.specific.gene,
+                      "ref gene - 25% malignant" = simulated_DEBoost_result_met_25$tumor.intrinsic.DE.gene.rs$ref.specific.gene,
+                      "ref gene - 50% malignant" = simulated_DEBoost_result_met_50$tumor.intrinsic.DE.gene.rs$ref.specific.gene,
+                      "ref gene - 75% malignant" = simulated_DEBoost_result_met_75$tumor.intrinsic.DE.gene.rs$ref.specific.gene,
+                      "ref gene - 90% malignant" = simulated_DEBoost_result_met_90$tumor.intrinsic.DE.gene.rs$ref.specific.gene)
+ref_venn.plot <- venn.diagram(x = ref_gene_data, filename = NULL,
+                             fill = c("red", "blue", "green", "grey", "purple"),
+                             cat.col = c("red", "blue", "green", "grey", "purple"),
+                             alpha = 0.6, cat.cex = 0.8, margin = 0.2)
+#pdf("prop_malignancy/ref_gene_venn.pdf", width = 8, height = 6)
+png("prop_malignancy/ref_gene_venn.png", width = 800, height = 600, res = 150)
+grid.draw(ref_venn.plot)
+dev.off()
+
+#pdf("prop_malignancy/ref_gene_upset_plot.pdf", width = 8, height = 6)
+png("prop_malignancy/ref_gene_upset_plot.png", width = 800, height = 600, res = 150)
+upset(fromList(ref_gene_data), sets = c("ref gene - 10% malignant", "ref gene - 25% malignant", "ref gene - 50% malignant", 
+                                       "ref gene - 75% malignant", "ref gene - 90% malignant"), order.by = "freq")
+dev.off()
+#####
+
+##### Plots II/II #####
+library(ggplot2)
+
+# Function to create and save plots
+generate_bar_plot <- function(data, title, output_path, y_range = NULL) {
+  counts <- data.frame(
+    Proportion = c("10%", "25%", "50%", "75%", "90%"),
+    Count = sapply(data, length)
+  )
+  
+  # Start graphics device for PNG
+  png(output_path, width = 800, height = 600, res = 150)
+  
+  # Create the plot
+  p <- ggplot(counts, aes(x = Proportion, y = Count, group = 1)) +
+    geom_bar(stat = "identity", aes(fill = Proportion), width = 0.6) +
+    geom_line(aes(group = 1), color = "blue", size = 1) +
+    geom_point(color = "blue", size = 3) +
+    labs(title = title, x = "Malignancy Proportion", y = "Number of Genes") +
+    theme_minimal() +
+    scale_fill_brewer(palette = "Set3") +
+    theme(legend.position = "none")
+  
+  # Add y-axis range if provided
+  if (!is.null(y_range)) {
+    p <- p + coord_cartesian(ylim = y_range)
+  }
+  
+  print(p) # Render the plot
+  dev.off() # Close graphics device
+}
+
+# Generate plots for upregulated, downregulated, and reference-specific genes
+generate_bar_plot(up_gene_data, 
+                  "Number of Upregulated Genes Across Malignancy", 
+                  "prop_malignancy/up_gene_barplot.png")
+
+generate_bar_plot(dn_gene_data, 
+                  "Number of Downregulated Genes Across Malignancy", 
+                  "prop_malignancy/dn_gene_barplot.png")
+
+generate_bar_plot(ref_gene_data, 
+                  "Number of Reference-Specific Genes Across Malignancy", 
+                  "prop_malignancy/ref_gene_barplot.png", 
+                  y_range = c(400, 600)) # Example of limiting y-axis range
+
+#####
+
+################################################################################
+# END
+################################################################################
